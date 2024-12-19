@@ -1,0 +1,21 @@
+{
+  "name": "wal-wp-be",
+  "version": "1.0.0",
+  "description": "WAL-WP-BE/\r │\r ├── config/\r │   ├── db.js\r ├── models/\r │   ├── index.js\r │   ├── User.js\r │   ├── Event.js\r │   ├── Ticket.js\r │   ├── Blog.js\r │   ├── Advertisement.js\r │   ├── Notification.js\r │   ├── Payment.js\r │   ├── Venue.js\r │   ├── Coupon.js\r │\r ├── controllers/\r │   ├── userController.js\r │   ├── eventController.js\r │   ├── ticketController.js\r │   ├── blogController.js\r │   ├── advertisementController.js\r │   ├── notificationController.js\r │   ├── paymentController.js\r │   ├── venueController.js\r │   ├── couponController.js\r │\r ├── routes/\r │   ├── userRoutes.js\r │   ├── eventRoutes.js\r │   ├── ticketRoutes.js\r │   ├── blogRoutes.js\r │   ├── advertisementRoutes.js\r │   ├── notificationRoutes.js\r │   ├── paymentRoutes.js\r │   ├── venueRoutes.js\r │   ├── couponRoutes.js\r │\r ├── utils/\r │   ├── db.js\r │   ├── helpers.js\r │\r ├── app.js\r ├── package.json\r ├── .env",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "mysql2": "^3.11.5",
+    "sequelize": "^6.37.5"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.9"
+  }
+}

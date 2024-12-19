@@ -1,0 +1,45 @@
+WAL-WP-BE/
+│
+├── config/
+│   ├── db.js
+|   ├── email.config.js
+├── models/
+│   ├── index.js
+│   ├── User.js
+│   ├── Event.js
+│   ├── Ticket.js
+│   ├── Blog.js
+│   ├── Advertisement.js
+│   ├── Notification.js
+│   ├── Payment.js
+│   ├── Venue.js
+│   ├── Coupon.js
+│   ├── Permission.js
+├── controllers/
+│   ├── userController.js
+│   ├── eventController.js
+│   ├── ticketController.js
+│   ├── blogController.js
+│   ├── advertisementController.js
+│   ├── notificationController.js
+│   ├── paymentController.js
+│   ├── venueController.js
+│   ├── couponController.js
+│   ├── PermissionController.js
+├── routes/
+│   ├── userRoutes.js
+│   ├── eventRoutes.js
+│   ├── ticketRoutes.js
+│   ├── blogRoutes.js
+│   ├── advertisementRoutes.js
+│   ├── notificationRoutes.js
+│   ├── paymentRoutes.js
+│   ├── venueRoutes.js
+│   ├── couponRoutes.js
+│   ├── PermissionRoutes.js
+├── utils/
+│   ├── helpers.js
+│
+├── app.js
+├── package.json
+├── .env
