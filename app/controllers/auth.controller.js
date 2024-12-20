@@ -47,18 +47,34 @@ exports.register = async (req, res) => {
       },
     });
 
-    const verificationLink = `${process.env.BASE_URL}/api/auth/verify-email/${token}`;
+    const verificationLink = `${process.env.BACKEND_URL}/api/auth/verify-email/${token}`;
     const mailOptions = {
       from: process.env.EMAIL_USER,
       to: email,
       subject: "Verify Your Email",
       html: `
         <h3>Welcome to We Are Lebanon App, ${name}</h3>
-        <p>Please verify your email by clicking the link below:</p>
-        <a href="${verificationLink}" style="padding: 10px 20px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px;">Verify Email</a>
+        <p>Please verify your email by clicking the button below:</p>
+        <form action="${verificationLink}" method="POST" style="display: inline;">
+          <input type="hidden" name="token" value="${token}" />
+          <button type="submit" style="
+              padding: 10px 20px;
+              background-color: #007bff;
+              color: #ffffff;
+              text-decoration: none;
+              border: none;
+              border-radius: 5px;
+              font-size: 16px;
+              cursor: pointer;
+            ">
+            Verify Email
+          </button>
+        </form>
+        <p>If the button above doesn't work, copy and paste the following link into your browser:</p>
+        <p>${verificationLink}?token=${token}</p>
       `,
     };
-
+    
     await transporter.sendMail(mailOptions);
 
     res.status(201).json({
@@ -74,6 +90,10 @@ exports.register = async (req, res) => {
 // ** Login User **
 exports.login = async (req, res) => {
   const { email, password } = req.body;
+
+  if (!email || !password) {
+    return res.status(400).json({ message: "Email and password are required" });
+  }
 
   try {
     // Find the user by email
@@ -93,12 +113,21 @@ exports.login = async (req, res) => {
       return res.status(401).json({ message: "Invalid password" });
     }
 
-    // Generate a token
-    const token = jwt.sign({ id: user.id, role: user.role }, process.env.JWT_SECRET, {
-      expiresIn: "1d",
-    });
+    // Generate a token if it doesn't exist or has expired
+    if (!user.token || new Date(user.TokenExpires) < Date.now()) {
+      const token = jwt.sign({ id: user.id, role: user.role }, process.env.JWT_SECRET, {
+        expiresIn: "7d", // Token lasts for 7 days
+      });
 
-    res.status(200).json({ message: "Login successful", token });
+      // Save token and expiration in the database
+      const tokenExpires = new Date();
+      tokenExpires.setDate(tokenExpires.getDate() + 7); // Set expiration to 7 days from now
+      user.token = token;
+      user.TokenExpires = tokenExpires;
+      await user.save();
+    }
+
+    res.status(200).json({ message: "Login successful", token: user.token });
   } catch (error) {
     console.error("Error during login:", error);
     res.status(500).json({ message: "An error occurred during login", error: error.message });
@@ -107,7 +136,20 @@ exports.login = async (req, res) => {
 
 // ** Logout User **
 exports.logout = async (req, res) => {
+  const { token } = req.body; // Assuming the token is sent in the request body or headers
+
   try {
+    // Find the user by the token
+    const user = await User.findOne({ where: { token } });
+    if (!user) {
+      return res.status(404).json({ message: "User not found or already logged out" });
+    }
+
+    // Clear the token and its expiration
+    user.token = null;
+    user.TokenExpires = null;
+    await user.save();
+
     res.status(200).json({ message: "Logout successful" });
   } catch (error) {
     console.error("Error during logout:", error);
@@ -117,39 +159,49 @@ exports.logout = async (req, res) => {
 
 // ** Verify Email **
 exports.verifyEmail = async (req, res) => {
-    const { token } = req.params;
-  
-    try {
-      // Find user by token and expiration
-      const user = await User.findOne({
-        where: { token, TokenExpires: { [Op.gt]: new Date() } },
-      });
-  
-      if (!user) {
-        return res.status(400).json({ message: "Invalid or expired verification token" });
-      }
-  
-      // Update user to mark as verified
-      user.isVerified = true;
-      user.token = null; // Clear the token
-      user.TokenExpires = null;
-      await user.save();
-  
-      res.status(200).send(`
-        <!DOCTYPE html>
+  const { token } = req.body;
+
+  try {
+    // Find the user by token and check expiration
+    const user = await User.findOne({
+      where: { token, TokenExpires: { [Op.gt]: new Date() } },
+    });
+
+    if (!user) {
+      return res.status(400).send(`
         <html>
-        <head>
-          <title>Email Verified</title>
-        </head>
-        <body>
-          <h2>Email Verified Successfully</h2>
-          <p>Your account has been verified. You can now log in to your account.</p>
-        </body>
+          <body>
+            <h3>Invalid or Expired Token</h3>
+            <p>The verification link is invalid or has expired. Please request a new one.</p>
+          </body>
         </html>
       `);
-    } catch (error) {
-      console.error("Error verifying email:", error);
-      res.status(500).json({ message: "Error verifying account", error: error.message });
     }
-  };
-  
+
+    // Mark user as verified
+    user.isVerified = true;
+    user.token = null; // Clear token
+    user.TokenExpires = null;
+    await user.save();
+
+    res.status(200).send(`
+      <html>
+        <body>
+          <h3>Email Verified Successfully</h3>
+          <p>Your account has been verified. You can now log in to your account.</p>
+        </body>
+      </html>
+    `);
+  } catch (error) {
+    console.error("Error verifying email:", error);
+    res.status(500).send(`
+      <html>
+        <body>
+          <h3>Error Verifying Email</h3>
+          <p>An error occurred while verifying your account. Please try again later.</p>
+        </body>
+      </html>
+    `);
+  }
+};
+

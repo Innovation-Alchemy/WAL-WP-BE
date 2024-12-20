@@ -1,9 +1,9 @@
 module.exports = (app) => {
   const express = require('express');
   const router = express.Router();
-  const userController = require('../controllers/userController');
+  const userController = require('../controllers/user.controller');
   const authenticate = require('../middleware/authMiddleware');
-  const checkPermission = require('../middleware/RBACMiddleware');
+  const checkPermission = require('../middleware/RBAC.Middleware');
 
   router.get('/users', authenticate, userController.getAllUsers);
   router.get('/users/:id', authenticate, userController.getUserById);

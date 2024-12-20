@@ -1,9 +1,9 @@
 module.exports = (app) => {
     const express = require('express');
     const router = express.Router();
-    const venueController = require('../controllers/venueController');
+    const venueController = require('../controllers/venue.controller');
     const authenticate = require('../middleware/authMiddleware');
-    const checkPermission = require('../middleware/RBACMiddleware');
+    const checkPermission = require('../middleware/RBAC.Middleware');
   
     router.get('/venues', authenticate, venueController.getAllVenues);
     router.get('/venues/:id', authenticate, venueController.getVenueById);

@@ -47,7 +47,7 @@ require("./app/routes/payment.routes")(app);
 require("./app/routes/ticket.routes")(app);
 require("./app/routes/venue.routes")(app);
 require("./app/routes/permission.routes")(app);
-
+require("./app/routes/auth.routes")(app);
 
 // Start server
 const PORT = process.env.PORT || 8080;

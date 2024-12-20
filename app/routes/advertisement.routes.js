@@ -1,9 +1,9 @@
 module.exports = (app) => {
     const express = require('express');
     const router = express.Router();
-    const advertisementController = require('../controllers/advertisementController');
+    const advertisementController = require('../controllers/advertisement.controller');
     const authenticate = require('../middleware/authMiddleware');
-    const checkPermission = require('../middleware/RBACMiddleware');
+    const checkPermission = require('../middleware/RBAC.Middleware');
   
     router.get('/ads', authenticate, advertisementController.getAllAds);
     router.get('/ads/:id', authenticate, advertisementController.getAdById);

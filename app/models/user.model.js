@@ -35,6 +35,10 @@ module.exports = (sequelize, Sequelize) => {
       type: Sequelize.ENUM("Admin", "Organizer", "Operator","User"),
       defaultValue: "User",
     },
+    hobbies: {
+      type: Sequelize.ENUM("sports", "reading", "swimming","driving","others"),
+      defaultValue: "others",
+    },
     gender: {
       type: Sequelize.ENUM("Male", "Female"),
       defaultValue: "Male",

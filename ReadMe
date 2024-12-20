@@ -6,6 +6,7 @@ WAL-WP-BE/
 ├── models/
 │   ├── index.js
 │   ├── User.js
+|   ├── auth.js
 │   ├── Event.js
 │   ├── Ticket.js
 │   ├── Blog.js
@@ -17,6 +18,7 @@ WAL-WP-BE/
 │   ├── Permission.js
 ├── controllers/
 │   ├── userController.js
+|   ├── authCpntroller.js
 │   ├── eventController.js
 │   ├── ticketController.js
 │   ├── blogController.js
@@ -28,6 +30,7 @@ WAL-WP-BE/
 │   ├── PermissionController.js
 ├── routes/
 │   ├── userRoutes.js
+|   ├── authRoutes.js
 │   ├── eventRoutes.js
 │   ├── ticketRoutes.js
 │   ├── blogRoutes.js

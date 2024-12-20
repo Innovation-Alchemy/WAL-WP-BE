@@ -1,0 +1,12 @@
+{
+    "watch": ["app/controllers","app/routes", "app/models", "server.js"], 
+    "ignore": [
+      "swagger-output.json",
+      "uploads/*",            
+      "node_modules/*",    
+      "logs/*"               
+    ],
+    "ext": "js,json",         
+    "exec": "node server.js"  
+  }
+  

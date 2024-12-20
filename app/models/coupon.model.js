@@ -5,35 +5,48 @@ module.exports = (sequelize, Sequelize) => {
         autoIncrement: true,
         primaryKey: true,
       },
-      code: {
+      event_id: {
+        type: Sequelize.INTEGER,
+        allowNull: true,
+      },
+      user_id: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+      },
+      coupon_key: {
         type: Sequelize.STRING,
         allowNull: false,
         unique: true,
       },
-      discountPercentage: {
+      discount_percentage: {
         type: Sequelize.DECIMAL(5, 2),
         allowNull: false,
       },
-      maxUses: {
+      discount_in_dollar: {
+        type: Sequelize.DOUBLE,
+        allowNull: false,
+      },
+      min_price:{
+        type: Sequelize.DOUBLE,
+        defaultValue: 0,
+      },
+      max_uses: {
         type: Sequelize.INTEGER,
         defaultValue: 1,
       },
-      currentUses: {
+      current_uses: {
         type: Sequelize.INTEGER,
         defaultValue: 0,
       },
-      validFrom: {
+      valid_from: {
         type: Sequelize.DATE,
         allowNull: false,
       },
-      validTo: {
+      valid_to: {
         type: Sequelize.DATE,
         allowNull: false,
       },
-      createdBy: {
-        type: Sequelize.INTEGER,
-        allowNull: false,
-      },
+    
     });
   
     return Coupon;

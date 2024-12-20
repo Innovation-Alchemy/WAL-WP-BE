@@ -1,7 +1,7 @@
 module.exports = (app) => {
     const express = require('express');
     const router = express.Router();
-    const notificationController = require('../controllers/notificationController');
+    const notificationController = require('../controllers/notification.controller');
     const authenticate = require('../middleware/authMiddleware');
   
     router.get('/notifications', authenticate, notificationController.getAllNotifications);

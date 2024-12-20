@@ -1,9 +1,9 @@
 module.exports = (app) => {
     const express = require('express');
     const router = express.Router();
-    const paymentController = require('../controllers/paymentController');
+    const paymentController = require('../controllers/payment.controller');
     const authenticate = require('../middleware/authMiddleware');
-    const checkPermission = require('../middleware/RBACMiddleware');
+    const checkPermission = require('../middleware/RBAC.Middleware');
   
     router.get('/payments', authenticate, paymentController.getAllPayments);
     router.get('/payments/:id', authenticate, paymentController.getPaymentById);

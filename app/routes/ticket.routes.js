@@ -1,9 +1,9 @@
 module.exports = (app) => {
     const express = require('express');
     const router = express.Router();
-    const ticketController = require('../controllers/ticketController');
+    const ticketController = require('../controllers/ticket.controller');
     const authenticate = require('../middleware/authMiddleware');
-    const checkPermission = require('../middleware/RBACMiddleware');
+    const checkPermission = require('../middleware/RBAC.Middleware');
   
     router.get('/tickets', authenticate, ticketController.getAllTickets);
     router.get('/tickets/:id', authenticate, ticketController.getTicketById);

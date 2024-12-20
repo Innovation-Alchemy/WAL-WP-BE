@@ -3,7 +3,7 @@ module.exports = (app) => {
   const router = express.Router();
   const permissionController = require('../controllers/permission.controller');
   const checkPermission = require('../middleware/RBAC.Middleware');
-  const authenticate = require('../middleware/auth.Middleware');
+  const authenticate = require('../middleware/authMiddleware');
 
   // ** Get all permissions **
   router.get('/permissions', authenticate, checkPermission('read-permission'), permissionController.getAllPermissions);
@@ -20,7 +20,7 @@ module.exports = (app) => {
   router.post(
     '/permissions/assign/:id',
     authenticate,
-    checkPermission('assign-permission'),
+    
     permissionController.assignPermissions
   );
 

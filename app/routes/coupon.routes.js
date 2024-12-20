@@ -1,13 +1,14 @@
 module.exports = (app) => {
     const express = require('express');
     const router = express.Router();
-    const couponController = require('../controllers/couponController');
+    const couponController = require('../controllers/coupon.controller');
     const authenticate = require('../middleware/authMiddleware');
-    const checkPermission = require('../middleware/RBACMiddleware');
+    const checkPermission = require('../middleware/RBAC.Middleware');
   
     router.get('/coupons', authenticate, couponController.getAllCoupons);
     router.get('/coupons/:id', authenticate, couponController.getCouponById);
     router.post('/coupons', authenticate, checkPermission('create-coupon'), couponController.createCoupon);
+    router.post("/coupons/apply",authenticate, couponController.applyCoupon);
     router.put('/coupons/:id', authenticate, checkPermission('update-coupon'), couponController.updateCoupon);
     router.delete('/coupons/:id', authenticate, checkPermission('delete-coupon'), couponController.deleteCoupon);
   
