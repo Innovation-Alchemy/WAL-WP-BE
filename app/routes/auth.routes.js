@@ -7,13 +7,16 @@ module.exports = (app) => {
     router.post("/auth/register", authController.register);
   
     // ** Verify Email **
-    router.post("/auth/verify-email/:token", authController.verifyEmail);
+    router.get("/auth/verify-email/:token", authController.verifyEmail);
   
     // ** Login **
     router.post("/auth/login", authController.login);
   
     // ** Logout **
     router.post("/auth/logout", authController.logout);
+
+    // ** Approve **
+    router.post("/auth/approve/:id", authController.approveUser);
   
     app.use("/api", router);
   };

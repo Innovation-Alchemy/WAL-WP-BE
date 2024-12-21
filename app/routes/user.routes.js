@@ -4,11 +4,13 @@ module.exports = (app) => {
   const userController = require('../controllers/user.controller');
   const authenticate = require('../middleware/authMiddleware');
   const checkPermission = require('../middleware/RBAC.Middleware');
+  const upload = require("../middleware/uploadMiddleware"); // Import multer middleware
+
 
   router.get('/users', authenticate, userController.getAllUsers);
   router.get('/users/:id', authenticate, userController.getUserById);
-  router.post('/users', authenticate, checkPermission('create-user'), userController.createUser);
-  router.put('/users/:id', authenticate, checkPermission('update-user'), userController.updateUser);
+  router.post('/users', authenticate,upload.single("profile_picture"), checkPermission('create-user'), userController.createUser);
+  router.put('/users/:id', authenticate,upload.single("profile_picture"), checkPermission('update-user'), userController.updateUser);
   router.delete('/users/:id', authenticate, checkPermission('delete-user'), userController.deleteUser);
 
   app.use('/api', router);

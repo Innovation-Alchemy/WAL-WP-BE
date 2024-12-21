@@ -55,21 +55,19 @@ exports.register = async (req, res) => {
       html: `
         <h3>Welcome to We Are Lebanon App, ${name}</h3>
         <p>Please verify your email by clicking the button below:</p>
-        <form action="${verificationLink}" method="POST" style="display: inline;">
-          <input type="hidden" name="token" value="${token}" />
-          <button type="submit" style="
-              padding: 10px 20px;
-              background-color: #007bff;
-              color: #ffffff;
-              text-decoration: none;
-              border: none;
-              border-radius: 5px;
-              font-size: 16px;
-              cursor: pointer;
-            ">
-            Verify Email
-          </button>
-        </form>
+       <a href="${verificationLink}?token=${token}" 
+   style="
+     padding: 10px 20px;
+     background-color: #007bff;
+     color: #ffffff;
+     text-decoration: none;
+     border-radius: 5px;
+     font-size: 16px;
+   "
+>
+  Verify Email
+</a>
+
         <p>If the button above doesn't work, copy and paste the following link into your browser:</p>
         <p>${verificationLink}?token=${token}</p>
       `,
@@ -104,7 +102,16 @@ exports.login = async (req, res) => {
 
     // Check if the account is verified
     if (!user.isVerified) {
-      return res.status(403).json({ message: "Account is not verified. Please verify your email." });
+      return res
+        .status(403)
+        .json({ message: "Account is not verified. Please verify your email." });
+    }
+
+    // Check if the account is approved
+    if (!user.isApproved) {
+      return res
+        .status(403)
+        .json({ message: "Account is not approved. Please contact the administrator." });
     }
 
     // Verify the password
@@ -134,6 +141,7 @@ exports.login = async (req, res) => {
   }
 };
 
+
 // ** Logout User **
 exports.logout = async (req, res) => {
   const { token } = req.body; // Assuming the token is sent in the request body or headers
@@ -157,9 +165,11 @@ exports.logout = async (req, res) => {
   }
 };
 
-// ** Verify Email **
+
+// ** Verify Email (GET version) **
 exports.verifyEmail = async (req, res) => {
-  const { token } = req.body;
+  // For a GET request, token might come from req.query
+  const { token } = req.query;
 
   try {
     // Find the user by token and check expiration
@@ -180,7 +190,7 @@ exports.verifyEmail = async (req, res) => {
 
     // Mark user as verified
     user.isVerified = true;
-    user.token = null; // Clear token
+    user.token = null;
     user.TokenExpires = null;
     await user.save();
 
@@ -188,7 +198,7 @@ exports.verifyEmail = async (req, res) => {
       <html>
         <body>
           <h3>Email Verified Successfully</h3>
-          <p>Your account has been verified. You can now log in to your account.</p>
+          <p>Your account has been verified. You can now log in.</p>
         </body>
       </html>
     `);
@@ -205,3 +215,24 @@ exports.verifyEmail = async (req, res) => {
   }
 };
 
+// ** Approve User **
+exports.approveUser = async (req, res) => {
+  try {
+    const { id } = req.params; // Extract user ID from request parameters
+
+    // Find the user by ID
+    const user = await User.findByPk(id);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Update the `isApproved` field to `true`
+    user.isApproved = true;
+    await user.save();
+
+    res.status(200).json({ message: "User approved successfully", data: user });
+  } catch (error) {
+    console.error("Error approving user:", error);
+    res.status(500).json({ message: "Error approving user", error: error.message });
+  }
+};

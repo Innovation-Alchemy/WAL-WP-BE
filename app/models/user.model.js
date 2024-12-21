@@ -36,18 +36,24 @@ module.exports = (sequelize, Sequelize) => {
       defaultValue: "User",
     },
     hobbies: {
-      type: Sequelize.ENUM("sports", "reading", "swimming","driving","others"),
-      defaultValue: "others",
+      type: Sequelize.JSON, // Use JSON to store multiple values
+      allowNull: true,
+      defaultValue: [],     // Default to an empty array
     },
+    
     gender: {
       type: Sequelize.ENUM("Male", "Female"),
       defaultValue: "Male",
     },
-    profilePicture: {
+    profile_picture: {
       type: Sequelize.STRING,
       allowNull: true,
     },
     isVerified: {
+      type: Sequelize.BOOLEAN,
+      defaultValue: false,
+    },
+    isApproved: {
       type: Sequelize.BOOLEAN,
       defaultValue: false,
     },
