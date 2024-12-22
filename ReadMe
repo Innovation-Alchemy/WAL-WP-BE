@@ -1,3 +1,45 @@
+Install XAMPP
+
+Download and install XAMPP.
+Start the Apache and MySQL services.
+Create the Database
+
+Open phpMyAdmin at http://localhost/phpmyadmin.
+Create a new database named wal-wp.
+Set Up the Project
+
+Clone the repository:
+
+git clone https://github.com/Innovation-Alchemy/WAL-WP-BE.git
+cd WAL-WP-BE
+
+create a .env file:
+JWT_SECRET=wal-wp
+DB_DATABASE=wal-wp
+PORT = 8080
+DB_USER=root
+DB_PASSWORD=her
+DB_HOST=localhost
+DB_PORT=3306
+EMAIL_HOST=smtp.gmail.com
+EMAIL_PORT=587
+EMAIL_USER=fadel.ahammoud@gmail.com
+EMAIL_PASS=mtmrybkpmobccdrh
+EMAIL_FROM=fadel.ahammoud@gmail.com
+EMAIL_DESTINATION=fadel.ahammoud@gmail.com
+BACKEND_URL=http://localhost:8080
+
+Install dependencies:
+
+npm install
+Start the Application
+
+Start the application in development mode:
+
+npm run start:dev
+The backend should now be running on http://localhost:8080.
+
+
 WAL-WP-BE/
 │
 ├── config/
@@ -16,6 +58,7 @@ WAL-WP-BE/
 │   ├── Venue.js
 │   ├── Coupon.js
 │   ├── Permission.js
+|   ├── Hobby.js
 ├── controllers/
 │   ├── userController.js
 |   ├── authCpntroller.js
@@ -28,6 +71,7 @@ WAL-WP-BE/
 │   ├── venueController.js
 │   ├── couponController.js
 │   ├── PermissionController.js
+│   ├── HobbyController.js
 ├── routes/
 │   ├── userRoutes.js
 |   ├── authRoutes.js
@@ -40,6 +84,7 @@ WAL-WP-BE/
 │   ├── venueRoutes.js
 │   ├── couponRoutes.js
 │   ├── PermissionRoutes.js
+│   ├── HobbyRoutes.js
 ├── utils/
 │   ├── helpers.js
 │

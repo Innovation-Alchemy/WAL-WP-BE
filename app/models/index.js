@@ -29,6 +29,7 @@ db.Venue = require("./venue.model")(sequelize, Sequelize);
 db.Coupon = require("./coupon.model")(sequelize, Sequelize);
 db.Category = require("./category.model")(sequelize, Sequelize);
 db.Permission = require ("./permission.model")(sequelize, Sequelize);
+db.Hobby = require ("./hobby.model")(sequelize, Sequelize);
 
 // Define Relationships
 db.User.hasMany(db.Event, { foreignKey: "user_id", onDelete: "CASCADE" });
@@ -64,6 +65,10 @@ db.Coupon.belongsTo(db.User, { foreignKey: "user_id" });
 // User and Permissions (one-to-one)
 db.User.hasOne(db.Permission, { foreignKey: "permissions", onDelete: "CASCADE" });
 db.Permission.belongsTo(db.User, { foreignKey: "permissions" });
+
+// User and Hobby (one-to-one)
+db.User.hasOne(db.Hobby, { foreignKey: "hobbies", onDelete: "CASCADE" });
+db.Hobby.belongsTo(db.User, { foreignKey: "hobbies" });
 
 // Sync models with database
 /*sequelize.sync({ alter: true })
