@@ -1,7 +1,7 @@
 const db = require("../models");
 const Permission = db.Permission;
 const User = db.User;
-
+const { addPermissionSchema, assignPermissionSchema, removePermissionSchema,} = require("../utils/validations");
 
 // ** Get All Permissions **
 exports.getAllPermissions = async (req, res) => {
@@ -18,14 +18,18 @@ exports.getAllPermissions = async (req, res) => {
 
 // ** Add a New Permission **
 exports.addPermission = async (req, res) => {
-  const { name } = req.body;
+  const { error } = addPermissionSchema.validate(req.body);
+  if (error) {
+    return res.status(400).json({ message: error.details[0].message });
+  }
+
   try {
+    const { name } = req.body;
     const newPermission = await Permission.create({ name });
     res.status(201).json({ success: true, data: newPermission });
   } catch (error) {
-    const status =
-      error.name === "SequelizeUniqueConstraintError" ? 409 : 400;
-    res.status(status).json({ message: "Error adding permission", error: error.message });
+    const status = error.name === 'SequelizeUniqueConstraintError' ? 409 : 400;
+    res.status(status).json({ message: 'Error adding permission', error: error.message });
   }
 };
 
@@ -79,6 +83,10 @@ exports.deletePermission = async (req, res) => {
 
 // ** Assign Permissions to User **
 exports.assignPermissions = async (req, res) => {
+  const { error } = assignPermissionSchema.validate(req.body);
+  if (error) {
+    return res.status(400).json({ message: error.details[0].message });
+  }
   const { id } = req.params; // User ID
   const { permissionIds } = req.body;
 
@@ -136,9 +144,12 @@ exports.assignPermissions = async (req, res) => {
   }
 };
 
-
 // ** Remove Permissions from User **
 exports.removePermissions = async (req, res) => {
+  const { error } = removePermissionSchema.validate(req.body);
+  if (error) {
+    return res.status(400).json({ message: error.details[0].message });
+  }
   const { id } = req.params; // User ID
   const { permissionIds } = req.body;
 
@@ -225,8 +236,6 @@ exports.removePermissions = async (req, res) => {
     res.status(500).json({ message: "Error removing permissions", error: error.message });
   }
 };
-
-
 
 // ** Get Permissions for a User **
 exports.getPermissions = async (req, res) => {

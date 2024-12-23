@@ -1,5 +1,6 @@
 const db = require("../models");
 const Blog = db.Blog;
+const {createBlogSchema}= require('../utils/validations');
 
 /**
  * Retrieve all blogs
@@ -32,6 +33,13 @@ exports.getBlogById = async (req, res) => {
  * Create a new blog
  */
 exports.createBlog = async (req, res) => {
+  const { error } = createBlogSchema.validate(req.body);
+
+  // Return validation error if any
+  if (error) {
+    return res.status(400).json({ message: error.details[0].message });
+  }
+
   try {
     const { user_id, event_id, title, content, tags, description } = req.body;
 
@@ -116,7 +124,6 @@ exports.updateBlog = async (req, res) => {
     res.status(500).json({ message: "Error updating blog", error: error.message });
   }
 };
-
 
 
 /**

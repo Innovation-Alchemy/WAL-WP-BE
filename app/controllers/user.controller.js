@@ -4,6 +4,7 @@ const bcrypt = require("bcryptjs");
 const crypto = require("crypto");
 const nodemailer = require("nodemailer");
 const { Op } = require("sequelize");
+const {CreateUserValidationSchema} = require("../utils/validations");
 require("dotenv").config();
 
 exports.getAllUsers = async (req, res) => {
@@ -28,8 +29,12 @@ exports.getUserById = async (req, res) => {
 };
 
 exports.createUser = async (req, res) => {
+    // Validate the input using Joi schema
+    const { error } = CreateUserValidationSchema.validate(req.body);
+    if (error) {
+      return res.status(400).json({ message: error.details[0].message });
+    }
   try {
-   
     // 2) Destructure request body
     const { name, email, password, phone_number, birthdate, gender, role } = req.body;
 
@@ -223,7 +228,6 @@ exports.updateUser = async (req, res) => {
     res.status(500).json({ message: "Error updating user", error: err.message });
   }
 };
-
 
 exports.deleteUser = async (req, res) => {
   try {

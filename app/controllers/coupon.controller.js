@@ -1,5 +1,6 @@
 const db = require("../models");
 const Coupon = db.Coupon;
+const {  createCouponSchema,applyCouponSchema} = require("../utils/validations");
 
 exports.getAllCoupons = async (req, res) => {
   try {
@@ -23,6 +24,13 @@ exports.getCouponById = async (req, res) => {
 };
 
 exports.createCoupon = async (req, res) => {
+  const { error } = createCouponSchema.validate(req.body);
+
+  // Return validation error if any
+  if (error) {
+    return res.status(400).json({ message: error.details[0].message });
+  }
+
   try {
     const {
       user_id,
@@ -39,11 +47,6 @@ exports.createCoupon = async (req, res) => {
     const existingCoupon = await Coupon.findOne({ where: { coupon_key } });
     if (existingCoupon) {
       return res.status(400).json({ message: "Coupon key already exists" });
-    }
-
-    // Ensure `valid_from` is before `valid_to`
-    if (new Date(valid_from) >= new Date(valid_to)) {
-      return res.status(400).json({ message: "`valid_from` must be before `valid_to`" });
     }
 
     // Create the coupon
@@ -67,6 +70,13 @@ exports.createCoupon = async (req, res) => {
 
 
 exports.applyCoupon = async (req, res) => {
+  const { error } = applyCouponSchema.validate(req.body);
+
+  // Return validation error if any
+  if (error) {
+    return res.status(400).json({ message: error.details[0].message });
+  }
+  
   const { coupon_key, total_price, user_id } = req.body;
 
   try {

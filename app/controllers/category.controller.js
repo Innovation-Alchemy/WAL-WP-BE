@@ -1,5 +1,6 @@
 const db = require("../models");
 const Category = db.Category;
+const {createCategorySchema} = require("../utils/validations");
 
 exports.getAllCategories = async (req, res) => {
   try {
@@ -23,14 +24,23 @@ exports.getCategoryById = async (req, res) => {
 };
 
 exports.createCategory = async (req, res) => {
+  const { error } = createCategorySchema.validate(req.body);
+
+  // Return validation error if any
+  if (error) {
+    return res.status(400).json({ message: error.details[0].message });
+  }
+
   try {
     const category = await Category.create(req.body);
     res.status(201).json({ message: "Category created successfully", data: category });
   } catch (error) {
-    console.error("Error creating category:", error);
-    res.status(500).json({ message: "Error creating category", error: error.message });
+    const status =
+      error.name === "SequelizeUniqueConstraintError" ? 409 : 500;
+    res.status(status).json({ message: "Error creating category", error: error.message });
   }
 };
+
 
 exports.updateCategory = async (req, res) => {
   try {

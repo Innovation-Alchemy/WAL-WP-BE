@@ -26,6 +26,7 @@ module.exports = (sequelize, Sequelize) => {
     phone_number: {
       type: Sequelize.STRING,
       allowNull: true,
+      unique: true,
     },
     birthdate: {
       type: Sequelize.STRING,

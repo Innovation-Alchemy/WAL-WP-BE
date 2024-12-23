@@ -5,11 +5,19 @@ const { Op } = require("sequelize");
 const { generateToken } = require("../utils/generateToken");
 const User = db.User;
 const nodemailer = require("nodemailer");
+const { AuthVAlSchema, LoginVAlSchema } = require("../utils/validations");
 require("dotenv").config();
 
 // ** Register User **
 exports.register = async (req, res) => {
-  const { name, email, password, phone_number, birthdate, gender, role } = req.body;
+  const { name, email, password, phone_number, birthdate, gender, role } =
+    req.body;
+
+  // Validate input using Joi schema
+  const { error } = AuthVAlSchema.validate(req.body);
+  if (error) {
+    return res.status(400).json({ message: error.details[0].message });
+  }
 
   try {
     // Check if the email already exists
@@ -29,7 +37,7 @@ exports.register = async (req, res) => {
       phone_number,
       birthdate,
       gender,
-      role
+      role,
     });
 
     // Generate a verification token
@@ -56,38 +64,46 @@ exports.register = async (req, res) => {
         <h3>Welcome to We Are Lebanon App, ${name}</h3>
         <p>Please verify your email by clicking the button below:</p>
        <a href="${verificationLink}?token=${token}" 
-   style="
-     padding: 10px 20px;
-     background-color: #007bff;
-     color: #ffffff;
-     text-decoration: none;
-     border-radius: 5px;
-     font-size: 16px;
-   "
->
-  Verify Email
-</a>
-
+          style="
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: #ffffff;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 16px; ">
+             Verify Email
+        </a>
         <p>If the button above doesn't work, copy and paste the following link into your browser:</p>
         <p>${verificationLink}?token=${token}</p>
       `,
     };
-    
+
     await transporter.sendMail(mailOptions);
 
     res.status(201).json({
-      message: "Registration successful. Please check your email to verify your account.",
+      message:
+        "Registration successful. Please check your email to verify your account.",
     });
   } catch (error) {
     console.error("Error during registration:", error);
-    res.status(500).json({ message: "An error occurred during registration", error: error.message });
+    res
+      .status(500)
+      .json({
+        message: "An error occurred during registration",
+        error: error.message,
+      });
   }
 };
-
 
 // ** Login User **
 exports.login = async (req, res) => {
   const { email, password } = req.body;
+
+  // Validate input using Joi schema
+  const { error } = LoginVAlSchema.validate(req.body);
+  if (error) {
+    return res.status(400).json({ message: error.details[0].message });
+  }
 
   if (!email || !password) {
     return res.status(400).json({ message: "Email and password are required" });
@@ -104,14 +120,18 @@ exports.login = async (req, res) => {
     if (!user.isVerified) {
       return res
         .status(403)
-        .json({ message: "Account is not verified. Please verify your email." });
+        .json({
+          message: "Account is not verified. Please verify your email.",
+        });
     }
 
     // Check if the account is approved
     if (!user.isApproved) {
       return res
         .status(403)
-        .json({ message: "Account is not approved. Please contact the administrator." });
+        .json({
+          message: "Account is not approved. Please contact the administrator.",
+        });
     }
 
     // Verify the password
@@ -122,9 +142,13 @@ exports.login = async (req, res) => {
 
     // Generate a token if it doesn't exist or has expired
     if (!user.token || new Date(user.TokenExpires) < Date.now()) {
-      const token = jwt.sign({ id: user.id, role: user.role }, process.env.JWT_SECRET, {
-        expiresIn: "7d", // Token lasts for 7 days
-      });
+      const token = jwt.sign(
+        { id: user.id, role: user.role },
+        process.env.JWT_SECRET,
+        {
+          expiresIn: "7d", // Token lasts for 7 days
+        }
+      );
 
       // Save token and expiration in the database
       const tokenExpires = new Date();
@@ -137,10 +161,14 @@ exports.login = async (req, res) => {
     res.status(200).json({ message: "Login successful", token: user.token });
   } catch (error) {
     console.error("Error during login:", error);
-    res.status(500).json({ message: "An error occurred during login", error: error.message });
+    res
+      .status(500)
+      .json({
+        message: "An error occurred during login",
+        error: error.message,
+      });
   }
 };
-
 
 // ** Logout User **
 exports.logout = async (req, res) => {
@@ -150,7 +178,9 @@ exports.logout = async (req, res) => {
     // Find the user by the token
     const user = await User.findOne({ where: { token } });
     if (!user) {
-      return res.status(404).json({ message: "User not found or already logged out" });
+      return res
+        .status(404)
+        .json({ message: "User not found or already logged out" });
     }
 
     // Clear the token and its expiration
@@ -161,10 +191,14 @@ exports.logout = async (req, res) => {
     res.status(200).json({ message: "Logout successful" });
   } catch (error) {
     console.error("Error during logout:", error);
-    res.status(500).json({ message: "An error occurred during logout", error: error.message });
+    res
+      .status(500)
+      .json({
+        message: "An error occurred during logout",
+        error: error.message,
+      });
   }
 };
-
 
 // ** Verify Email (GET version) **
 exports.verifyEmail = async (req, res) => {
@@ -233,6 +267,8 @@ exports.approveUser = async (req, res) => {
     res.status(200).json({ message: "User approved successfully", data: user });
   } catch (error) {
     console.error("Error approving user:", error);
-    res.status(500).json({ message: "Error approving user", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Error approving user", error: error.message });
   }
 };
