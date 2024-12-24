@@ -4,9 +4,11 @@ const jwt = require("jsonwebtoken");
 const { Op } = require("sequelize");
 const { generateToken } = require("../utils/generateToken");
 const User = db.User;
-const nodemailer = require("nodemailer");
-const { AuthVAlSchema, LoginVAlSchema } = require("../utils/validations");
+const transporter = require("../config/email.config");
+const { AuthVAlSchema, LoginVAlSchema,setPasswordSchema } = require("../utils/validations");
+const accountModels = { User: db.User,};
 require("dotenv").config();
+
 
 // ** Register User **
 exports.register = async (req, res) => {
@@ -45,15 +47,6 @@ exports.register = async (req, res) => {
     newUser.token = token;
     newUser.TokenExpires = TokenExpires;
     await newUser.save();
-
-    // Send verification email
-    const transporter = nodemailer.createTransport({
-      service: "gmail",
-      auth: {
-        user: process.env.EMAIL_USER, // Your email
-        pass: process.env.EMAIL_PASS, // Your email password
-      },
-    });
 
     const verificationLink = `${process.env.BACKEND_URL}/api/auth/verify-email/${token}`;
     const mailOptions = {
@@ -118,20 +111,19 @@ exports.login = async (req, res) => {
 
     // Check if the account is verified
     if (!user.isVerified) {
-      return res
-        .status(403)
-        .json({
-          message: "Account is not verified. Please verify your email.",
-        });
+      return res.status(403).json({
+        message: "Account is not verified. Please verify your email.",
+      });
     }
 
-    // Check if the account is approved
-    if (!user.isApproved) {
-      return res
-        .status(403)
-        .json({
-          message: "Account is not approved. Please contact the administrator.",
-        });
+    // Check if the account is approved (only for Admin and Organizer roles)
+    if (
+      (user.role === "Admin" || user.role === "Organizer") &&
+      !user.isApproved
+    ) {
+      return res.status(403).json({
+        message: "Account is not approved. Please contact the administrator.",
+      });
     }
 
     // Verify the password
@@ -158,17 +150,31 @@ exports.login = async (req, res) => {
       await user.save();
     }
 
-    res.status(200).json({ message: "Login successful", token: user.token });
+    // Parse hobbies from string to JSON if necessary
+    let hobbies = user.hobbies;
+    if (typeof hobbies === "string") {
+      hobbies = JSON.parse(hobbies);
+    }
+
+    // Set hobbies to null if it's an empty array
+    hobbies = Array.isArray(hobbies) && hobbies.length === 0 ? null : hobbies;
+
+    res.status(200).json({
+      message: "Login successful",
+      token: user.token,
+      data: {
+        hobbies, 
+      },
+    });
   } catch (error) {
     console.error("Error during login:", error);
-    res
-      .status(500)
-      .json({
-        message: "An error occurred during login",
-        error: error.message,
-      });
+    res.status(500).json({
+      message: "An error occurred during login",
+      error: error.message,
+    });
   }
 };
+
 
 // ** Logout User **
 exports.logout = async (req, res) => {
@@ -270,5 +276,119 @@ exports.approveUser = async (req, res) => {
     res
       .status(500)
       .json({ message: "Error approving user", error: error.message });
+  }
+};
+
+// Verify email and set password
+exports.verifyEmailAndSetPassword = async (req, res) => {
+  const { token, password, confirmPassword } = req.body;
+
+  const { error } = setPasswordSchema.validate({ token, password, confirmPassword });
+  if (error) {
+    return res.status(400).json({ message: "Invalid input", details: error.details });
+  }
+
+  try {
+    let account = null;
+    for (const modelName in accountModels) {
+      account = await accountModels[modelName].findOne({
+        where: { token, TokenExpires: { [Op.gt]: Date.now() } },
+      });
+      if (account) break;
+    }
+
+    if (!account) {
+      return res.status(400).json({ message: "Invalid or expired verification token" });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    account.password = hashedPassword;
+    account.isVerified = true;
+    account.token = null; // Clear token after successful verification
+    account.TokenExpires = null;
+    await account.save();
+
+    res.status(200).json({ message: "Account verified and password set successfully" });
+  } catch (err) {
+    console.error("Error verifying email:", err);
+    res.status(500).json({ message: "Error verifying account", error: err.message });
+  }
+};
+
+exports.renderVerificationForm = async (req, res) => {
+  const { token } = req.params;
+
+  try {
+    let account = null;
+
+    // Iterate through all account models to find the account with the given token
+    for (const modelName in accountModels) {
+      account = await accountModels[modelName].findOne({
+        where: { token, TokenExpires: { [Op.gt]: new Date() } },
+      });
+      if (account) break;
+    }
+
+    if (!account) {
+      return res.status(400).send('<h3>Invalid or expired token</h3>');
+    }
+
+    // Serve the HTML form
+    res.send(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Set Your Password</title>
+        <style>
+          body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f9f9f9;
+          }
+          form {
+            max-width: 400px;
+            margin: auto;
+            padding: 20px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+          }
+          input {
+            width: 80%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+          }
+          button {
+            width: 100%;
+            padding: 12px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+          }
+          button:hover {
+            background-color: #0056b3;
+          }
+        </style>
+      </head>
+      <body>
+        <form action="/api/auth/verify-email/set-password" method="POST">
+          <h2>Set Your Password</h2>
+          <input type="hidden" name="token" value="${token}" />
+          <input type="password" name="password" placeholder="Enter password" required />
+          <input type="password" name="confirmPassword" placeholder="Confirm password" required />
+          <button type="submit">Verify Account</button>
+        </form>
+      </body>
+      </html>
+    `);
+  } catch (error) {
+    console.error('Error rendering verification form:', error);
+    res.status(500).send('<h3>Something went wrong</h3>');
   }
 };

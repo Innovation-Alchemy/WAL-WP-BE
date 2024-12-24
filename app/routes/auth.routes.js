@@ -8,7 +8,13 @@ module.exports = (app) => {
   
     // ** Verify Email **
     router.get("/auth/verify-email/:token", authController.verifyEmail);
-  
+
+    // render verification page
+     router.get('/auth/verify-email/render-verfication/:token', authController.renderVerificationForm);
+    
+    // ** Verify Email And Set Passowrd **
+    router.post("/auth/verify-email/set-password", authController.verifyEmailAndSetPassword);
+
     // ** Login **
     router.post("/auth/login", authController.login);
   

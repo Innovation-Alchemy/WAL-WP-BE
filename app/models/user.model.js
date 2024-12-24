@@ -21,7 +21,7 @@ module.exports = (sequelize, Sequelize) => {
     },
     password: {
       type: Sequelize.STRING,
-      allowNull: false,
+      allowNull: true,
     },
     phone_number: {
       type: Sequelize.STRING,
@@ -46,10 +46,7 @@ module.exports = (sequelize, Sequelize) => {
       type: Sequelize.ENUM("Male", "Female"),
       defaultValue: "Male",
     },
-    profile_picture: {
-      type: Sequelize.STRING,
-      allowNull: true,
-    },
+
     isVerified: {
       type: Sequelize.BOOLEAN,
       defaultValue: false,

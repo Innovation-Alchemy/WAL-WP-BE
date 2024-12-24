@@ -97,7 +97,7 @@ const CreateUserValidationSchema = Joi.object({
     }),
   password: Joi.string()
     .min(8)
-    .required()
+    .optional()
     .messages({
       'string.min': 'Password must be at least 8 characters long.',
       'any.required': 'Password is required.',
@@ -379,10 +379,19 @@ const createBlogSchema = Joi.object({
   }),
 });
 
+// Input validation schema for setting password
+const setPasswordSchema = Joi.object({
+  token: Joi.string().required(),
+  password: Joi.string().min(8).required(),
+  confirmPassword: Joi.string().valid(Joi.ref("password")).required(),
+});
+
+
   module.exports = {
     AuthVAlSchema,
     LoginVAlSchema,
     CreateUserValidationSchema,
+    setPasswordSchema,
     notificationValidationSchema,
     addPermissionSchema,
     assignPermissionSchema,

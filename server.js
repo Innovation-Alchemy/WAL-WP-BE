@@ -49,6 +49,7 @@ require("./app/routes/venue.routes")(app);
 require("./app/routes/permission.routes")(app);
 require("./app/routes/auth.routes")(app);
 require("./app/routes/hobby.routes")(app);
+require("./app/routes/profile_details.routes")(app);
 
 // Start server
 const PORT = process.env.PORT || 8080;

@@ -48,6 +48,7 @@ WAL-WP-BE/
 ├── models/
 │   ├── index.js
 │   ├── User.js
+│   ├── Profile_Details.js
 |   ├── auth.js
 │   ├── Event.js
 │   ├── Ticket.js
@@ -62,6 +63,7 @@ WAL-WP-BE/
 ├── controllers/
 │   ├── userController.js
 |   ├── authCpntroller.js
+│   ├── Profile_Details.controller.js
 │   ├── eventController.js
 │   ├── ticketController.js
 │   ├── blogController.js
@@ -75,6 +77,7 @@ WAL-WP-BE/
 ├── routes/
 │   ├── userRoutes.js
 |   ├── authRoutes.js
+│   ├── Profile_Details.routes.js
 │   ├── eventRoutes.js
 │   ├── ticketRoutes.js
 │   ├── blogRoutes.js
@@ -87,6 +90,8 @@ WAL-WP-BE/
 │   ├── HobbyRoutes.js
 ├── utils/
 │   ├── helpers.js
+│   ├── generateToken.js
+│   ├── validations.js
 │
 ├── app.js
 ├── package.json
