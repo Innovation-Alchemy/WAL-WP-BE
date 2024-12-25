@@ -49,17 +49,17 @@ WAL-WP-BE/
 │   ├── index.js
 │   ├── User.js
 │   ├── Profile_Details.js
-|   ├── auth.js
+|   ├── category.js
 │   ├── Event.js
 │   ├── Ticket.js
 │   ├── Blog.js
-│   ├── Advertisement.js
-│   ├── Notification.js
-│   ├── Payment.js
-│   ├── Venue.js
+│   ├── views.js
+│   ├── likes.js
+│   ├── products.js
 │   ├── Coupon.js
 │   ├── Permission.js
 |   ├── Hobby.js
+|   ├── comments.js
 ├── controllers/
 │   ├── userController.js
 |   ├── authCpntroller.js
@@ -67,13 +67,14 @@ WAL-WP-BE/
 │   ├── eventController.js
 │   ├── ticketController.js
 │   ├── blogController.js
-│   ├── advertisementController.js
-│   ├── notificationController.js
-│   ├── paymentController.js
-│   ├── venueController.js
+│   ├── likesController.js
+│   ├── commentsController.js
+│   ├── viewsController.js
+│   ├── productsController.js
 │   ├── couponController.js
 │   ├── PermissionController.js
 │   ├── HobbyController.js
+│   ├── categoryController.js
 ├── routes/
 │   ├── userRoutes.js
 |   ├── authRoutes.js
@@ -81,13 +82,14 @@ WAL-WP-BE/
 │   ├── eventRoutes.js
 │   ├── ticketRoutes.js
 │   ├── blogRoutes.js
-│   ├── advertisementRoutes.js
-│   ├── notificationRoutes.js
-│   ├── paymentRoutes.js
-│   ├── venueRoutes.js
+│   ├── categoryRoutes.js
+│   ├── commentsRoutes.js
+│   ├── productRoutes.js
+│   ├── viewsRoutes.js
 │   ├── couponRoutes.js
 │   ├── PermissionRoutes.js
 │   ├── HobbyRoutes.js
+│   ├── likesRoutes.js
 ├── utils/
 │   ├── helpers.js
 │   ├── generateToken.js
