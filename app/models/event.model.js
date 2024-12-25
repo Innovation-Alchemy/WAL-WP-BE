@@ -13,31 +13,28 @@ module.exports = (sequelize, Sequelize) => {
         type: Sequelize.TEXT,
         allowNull: false,
       },
-      organizerId: {
+      organizer_id: {
         type: Sequelize.INTEGER,
         allowNull: false,
       },
-      date: {
-        type: Sequelize.DATE,
+      date_time: {
+        type: Sequelize.DATE,//make it an array
         allowNull: false,
       },
       location: {
+        type: Sequelize.STRING,//make it google maps check google api
+        allowNull: false,
+      },
+      seated: {
+        type: Sequelize.BOOLEAN,
+        allowNull: false,
+        defaultValue: false
+      },
+      links: {
         type: Sequelize.STRING,
         allowNull: false,
       },
-      ticketPrice: {
-        type: Sequelize.DECIMAL(10, 2),
-        allowNull: false,
-      },
-      totalTickets: {
-        type: Sequelize.INTEGER,
-        allowNull: false,
-      },
-      soldTickets: {
-        type: Sequelize.INTEGER,
-        defaultValue: 0,
-      },
-    });
+    },{ timestamps: true });
   
     return Event;
   };

@@ -9,6 +9,10 @@ module.exports = (sequelize, Sequelize) => {
         type: Sequelize.INTEGER,
         allowNull: true,
       },
+      product_id: {
+        type: Sequelize.INTEGER,
+        allowNull: true,
+      },
       user_id: {
         type: Sequelize.INTEGER,
         allowNull: false,
@@ -20,11 +24,11 @@ module.exports = (sequelize, Sequelize) => {
       },
       discount_percentage: {
         type: Sequelize.DECIMAL(5, 2),
-        allowNull: false,
+        allowNull: true,
       },
       discount_in_dollar: {
         type: Sequelize.DOUBLE,
-        allowNull: false,
+        allowNull: true,
       },
       min_price:{
         type: Sequelize.DOUBLE,
@@ -38,6 +42,10 @@ module.exports = (sequelize, Sequelize) => {
         type: Sequelize.INTEGER,
         defaultValue: 0,
       },
+      allowed_uses_per_user: {
+        type: Sequelize.INTEGER,
+        defaultValue: 1,
+      },
       valid_from: {
         type: Sequelize.DATE,
         allowNull: false,
@@ -46,8 +54,13 @@ module.exports = (sequelize, Sequelize) => {
         type: Sequelize.DATE,
         allowNull: false,
       },
+      used_by_users: {
+        type: Sequelize.JSON, // Store as an array of user IDs
+        allowNull: true,
+        defaultValue: [], // Default to an empty array
+      },
     
-    });
+    },{ timestamps: true });
   
     return Coupon;
   };

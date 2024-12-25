@@ -38,19 +38,18 @@ app.get("/", (req, res) => {
 // Import routes
 require("./app/routes/user.routes")(app);
 require("./app/routes/blog.routes")(app);
-require("./app/routes/advertisement.routes")(app);
 require("./app/routes/category.routes")(app);
 require("./app/routes/coupon.routes")(app);
 require("./app/routes/event.routes")(app);
-require("./app/routes/notification.routes")(app);
-require("./app/routes/payment.routes")(app);
 require("./app/routes/ticket.routes")(app);
-require("./app/routes/venue.routes")(app);
 require("./app/routes/permission.routes")(app);
 require("./app/routes/auth.routes")(app);
 require("./app/routes/hobby.routes")(app);
 require("./app/routes/profile_details.routes")(app);
-
+require("./app/routes/likes.routes")(app);
+require("./app/routes/comments.routes")(app);
+require("./app/routes/views.routes")(app);
+require("./app/routes/product.routes")(app);
 // Start server
 const PORT = process.env.PORT || 8080;
 server.listen(PORT, () => {

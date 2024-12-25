@@ -22,15 +22,15 @@ db.User = require("./user.model")(sequelize, Sequelize);
 db.Event = require("./event.model")(sequelize, Sequelize);
 db.Ticket = require("./ticket.model")(sequelize, Sequelize);
 db.Blog = require("./blog.model")(sequelize, Sequelize);
-db.Advertisement = require("./advertisement.model")(sequelize, Sequelize);
-db.Notification = require("./notification.model")(sequelize, Sequelize);
-db.Payment = require("./payment.model")(sequelize, Sequelize);
-db.Venue = require("./venue.model")(sequelize, Sequelize);
 db.Coupon = require("./coupon.model")(sequelize, Sequelize);
 db.Category = require("./category.model")(sequelize, Sequelize);
 db.Permission = require ("./permission.model")(sequelize, Sequelize);
+db.Product = require ("./product.model")(sequelize, Sequelize);
 db.Hobby = require ("./hobby.model")(sequelize, Sequelize);
 db.profile_Details= require ("./profile_details.model")(sequelize, Sequelize);
+db.comments = require("./comments.model")(sequelize, Sequelize);
+db.likes = require("./likes.model")(sequelize, Sequelize);
+db.views = require("./views.model")(sequelize, Sequelize);
 
 // Define Relationships
 db.User.hasMany(db.Event, { foreignKey: "user_id", onDelete: "CASCADE" });
@@ -45,20 +45,14 @@ db.Ticket.belongsTo(db.Event, { foreignKey: "event_id" });
 db.User.hasMany(db.Blog, { foreignKey: "user_id", onDelete: "CASCADE" });
 db.Blog.belongsTo(db.User, { foreignKey: "user_id" });
 
-db.User.hasMany(db.Advertisement, { foreignKey: "user_id", onDelete: "CASCADE" });
-db.Advertisement.belongsTo(db.User, { foreignKey: "user_id" });
-
-db.User.hasMany(db.Notification, { foreignKey: "user_id", onDelete: "CASCADE" });
-db.Notification.belongsTo(db.User, { foreignKey: "user_id" });
-
-db.User.hasMany(db.Payment, { foreignKey: "user_id", onDelete: "CASCADE" });
-db.Payment.belongsTo(db.User, { foreignKey: "user_id" });
-
-db.Venue.hasMany(db.Event, { foreignKey: "venue_id", onDelete: "CASCADE" });
-db.Event.belongsTo(db.Venue, { foreignKey: "venue_id" });
-
 db.Event.hasMany(db.Coupon, { foreignKey: "event_id", onDelete: "CASCADE" });
 db.Coupon.belongsTo(db.Event, { foreignKey: "event_id" });
+
+db.User.hasMany(db.Product, { foreignKey: "user_id", onDelete: "CASCADE" });
+db.Product.belongsTo(db.User, { foreignKey: "user_id" });
+
+db.Product.hasMany(db.Coupon, { foreignKey: "product_id", onDelete: "CASCADE" });
+db.Coupon.belongsTo(db.Product, { foreignKey: "product_id" });
 
 db.User.hasMany(db.Coupon, { foreignKey: "user_id", onDelete: "CASCADE" });
 db.Coupon.belongsTo(db.User, { foreignKey: "user_id" });
@@ -74,6 +68,30 @@ db.profile_Details.belongsTo(db.User, { foreignKey: "user_id" });
 // User and Hobby (one-to-one)
 db.User.hasOne(db.Hobby, { foreignKey: "hobbies", onDelete: "CASCADE" });
 db.Hobby.belongsTo(db.User, { foreignKey: "hobbies" });
+
+// User - Comment association (User can create many comments)
+db.User.hasMany(db.comments, { foreignKey: "user_id", onDelete: "CASCADE" });
+db.comments.belongsTo(db.User, { foreignKey: "user_id" });
+
+// User - Like association (User can like many blogs)
+db.User.hasMany(db.likes, { foreignKey: "user_id", onDelete: "CASCADE" });
+db.likes.belongsTo(db.User, { foreignKey: "user_id" });
+
+// User - Views association (User can view many blogs)
+db.User.hasMany(db.views, { foreignKey: "user_id", onDelete: "CASCADE" });
+db.views.belongsTo(db.User, { foreignKey: "user_id" });
+
+// Blog - Views association (Track users who viewed a blog)
+db.Blog.hasMany(db.views, { foreignKey: "blog_id", onDelete: "CASCADE" });
+db.views.belongsTo(db.Blog, { foreignKey: "blog_id" });
+
+// Blog - Like association (blog can have many likes)
+db.Blog.hasMany(db.likes, { foreignKey: "blog_id", onDelete: "CASCADE" });
+db.likes.belongsTo(db.Blog, { foreignKey: "blog_id" });
+
+// Blog - Comment association (blog has many comments)
+db.Blog.hasMany(db.comments, { foreignKey: "blog_id", onDelete: "CASCADE" });
+db.comments.belongsTo(db.Blog, { foreignKey: "blog_id" });
 
 // Sync models with database
 /*sequelize.sync({ alter: true })

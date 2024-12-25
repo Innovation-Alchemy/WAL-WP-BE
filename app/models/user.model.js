@@ -63,7 +63,7 @@ module.exports = (sequelize, Sequelize) => {
       type: Sequelize.DATE,
       allowNull: true,
     },
-  });
+  },{ timestamps: true });
 
   return User;
 };

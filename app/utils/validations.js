@@ -280,24 +280,29 @@ const createCouponSchema = Joi.object({
     "string.min": "Coupon key must have at least 5 characters.",
     "any.required": "Coupon key is required.",
   }),
-  discount_percentage: Joi.number().min(0).max(100).required().messages({
+  discount_percentage: Joi.number().min(0).max(100).allow(null).messages({
     "number.base": "Discount percentage must be a number.",
     "number.min": "Discount percentage cannot be less than 0.",
     "number.max": "Discount percentage cannot exceed 100.",
-    "any.required": "Discount percentage is required.",
   }),
-  discount_in_dollar: Joi.number().min(0).required().messages({
+  discount_in_dollar: Joi.number().min(0).allow(null).messages({
     "number.base": "Discount in dollar must be a number.",
     "number.min": "Discount in dollar cannot be negative.",
-    "any.required": "Discount in dollar is required.",
   }),
   min_price: Joi.number().min(0).required().messages({
     "number.base": "Minimum price must be a number.",
     "number.min": "Minimum price cannot be negative.",
+    "any.required": "Minimum price is required.",
   }),
   max_uses: Joi.number().integer().min(1).required().messages({
     "number.base": "Maximum uses must be an integer.",
     "number.min": "Maximum uses must be at least 1.",
+    "any.required": "Maximum uses is required.",
+  }),
+  allowed_uses_per_user:Joi.number().integer().min(1).required().messages({
+    "number.base": "Allowed uses for a single user must be an integer.",
+    "number.min": "Allowed uses for a single user  must be at least 1.",
+    "any.required": "Allowed uses for a single user is required.",
   }),
   valid_from: Joi.date().required().messages({
     "date.base": "Valid from must be a valid date.",
@@ -308,6 +313,16 @@ const createCouponSchema = Joi.object({
     "date.greater": "Valid to must be after valid from.",
     "any.required": "Valid to is required.",
   }),
+}).custom((value, helpers) => {
+  const { discount_percentage, discount_in_dollar } = value;
+
+  if (discount_percentage === null && discount_in_dollar === null) {
+    return helpers.error(
+      "any.custom",
+      "At least one of discount_percentage or discount_in_dollar must be provided."
+    );
+  }
+  return value;
 });
 
 // Input Validation Apply Coupon schema
@@ -334,7 +349,7 @@ const createBlogSchema = Joi.object({
     "number.base": "User ID must be a number.",
     "any.required": "User ID is required.",
   }),
-  event_id: Joi.number().integer().required().messages({
+  event_id: Joi.number().integer().optional().messages({
     "number.base": "Event ID must be a number.",
     "any.required": "Event ID is required.",
   }),
@@ -386,6 +401,26 @@ const setPasswordSchema = Joi.object({
   confirmPassword: Joi.string().valid(Joi.ref("password")).required(),
 });
 
+// Validation schema for creating a product
+const createProductSchema = Joi.object({
+  user_id: Joi.number().integer().required().messages({
+    "number.base": "User ID must be a number.",
+    "any.required": "User ID is required.",
+  }),
+  name: Joi.string().min(3).max(100).required().messages({
+    "string.base": "Name must be a string.",
+    "string.min": "Name must be at least 3 characters long.",
+    "string.max": "Name cannot exceed 100 characters.",
+    "any.required": "Name is required.",
+  }),
+  description: Joi.string().allow(null, "").max(255).messages({
+    "string.base": "Description must be a string.",
+    "string.max": "Description cannot exceed 255 characters.",
+  }),
+  image: Joi.string().uri().allow(null, "").messages({
+    "string.uri": "Image must be a valid URL.",
+  }),
+});
 
   module.exports = {
     AuthVAlSchema,
@@ -402,5 +437,6 @@ const setPasswordSchema = Joi.object({
     createCategorySchema,
     createCouponSchema,
     applyCouponSchema,
-    createBlogSchema
+    createBlogSchema,
+    createProductSchema
 };

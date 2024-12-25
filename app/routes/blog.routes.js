@@ -9,9 +9,6 @@ module.exports = (app) => {
     router.get('/blogs', authenticate, blogController.getAllBlogs);
     router.get('/blogs/:id', authenticate, blogController.getBlogById);
     router.post('/blogs', upload.array("files", 10), authenticate, blogController.createBlog);
-    router.post('/blogs/comment/:id',  authenticate, blogController.addCommentToBlogPost);
-    router.post('/blogs/view/:id',  authenticate, blogController.addViewToBlogPost);
-    router.post('/blogs/like/:id',  authenticate, blogController.likeBlogPost);
     router.put('/blogs/:id', upload.array("files", 10), authenticate, blogController.updateBlog);
     router.delete('/blogs/:id', authenticate, blogController.deleteBlog);
   

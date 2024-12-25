@@ -5,11 +5,11 @@ module.exports = (sequelize, Sequelize) => {
         autoIncrement: true,
         primaryKey: true,
       },
-      eventId: {
+      event_id: {
         type: Sequelize.INTEGER,
         allowNull: false,
       },
-      buyerId: {
+      buyer_id: {
         type: Sequelize.INTEGER,
         allowNull: false,
       },
@@ -18,15 +18,28 @@ module.exports = (sequelize, Sequelize) => {
         allowNull: false,
         unique: true,
       },
-      status: {
-        type: Sequelize.ENUM("Valid", "Used", "Cancelled"),
-        defaultValue: "Valid",
+      ticket_price: {
+        type: Sequelize.JSON, //  make it array of prices
+        allowNull: false,
       },
-      purchaseDate: {
-        type: Sequelize.DATE,
-        defaultValue: Sequelize.NOW,
+      section: {
+        type: Sequelize.JSON, // section array of objects[{color,A}]
+        allowNull: false,
       },
-    });
+      total_seats: {
+        type: Sequelize.JSON, // array of seats
+        allowNull: false,
+      },
+      total_tickets: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+      },
+      tickets_sold: {
+        type: Sequelize.INTEGER,
+        defaultValue: 0,
+      },
+    
+    },{ timestamps: true });
   
     return Ticket;
   };

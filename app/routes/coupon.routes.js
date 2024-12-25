@@ -10,7 +10,7 @@ module.exports = (app) => {
     router.post('/coupons', authenticate, checkPermission('create-coupon'), couponController.createCoupon);
     router.post("/coupons/apply",authenticate, couponController.applyCoupon);
     router.put('/coupons/:id', authenticate, checkPermission('update-coupon'), couponController.updateCoupon);
-    router.delete('/coupons/:id', authenticate, checkPermission('delete-coupon'), couponController.deleteCoupon);
+    router.delete('/coupons/delete/:id', authenticate, checkPermission('delete-coupon'), couponController.deleteCoupon);
   
     app.use('/api', router);
   };

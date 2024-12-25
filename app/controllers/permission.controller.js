@@ -53,18 +53,38 @@ exports.getPermissionById = async (req, res) => {
 exports.updatePermission = async (req, res) => {
   const { id } = req.params;
   const { name } = req.body;
+
   try {
+    // Check if the permission exists
     const permission = await Permission.findByPk(id);
     if (!permission) {
       return res.status(404).json({ message: "Permission not found" });
     }
-    permission.name = name;
+
+    // Update the name if provided
+    if (name) {
+      permission.name = name;
+    }
+
+    // Save the updated permission
     await permission.save();
+
     res.status(200).json({ success: true, data: permission });
   } catch (error) {
+    // Handle Sequelize validation errors
+    if (error.name === "SequelizeUniqueConstraintError") {
+      return res.status(409).json({
+        message: "Permission name must be unique",
+        error: error.errors.map((e) => e.message),
+      });
+    }
+
+    // Handle other errors
+    console.error("Error updating permission:", error);
     res.status(500).json({ message: "Error updating permission", error: error.message });
   }
 };
+
 
 // ** Delete Permission by ID **
 exports.deletePermission = async (req, res) => {

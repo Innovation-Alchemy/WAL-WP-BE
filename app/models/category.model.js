@@ -21,7 +21,7 @@ module.exports = (sequelize, Sequelize) => {
         allowNull: false,
         trim: true,
       },
-    });
+    },{ timestamps: true });
   
     return Category;
   };

@@ -58,7 +58,7 @@ module.exports = (sequelize, Sequelize) => {
         allowNull: true,
       },
    
-    });
+    },{ timestamps: true });
   
     return ProfileDetails;
   };
