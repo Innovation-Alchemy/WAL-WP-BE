@@ -4,12 +4,14 @@ module.exports = (app) => {
     const ticketController = require('../controllers/ticket.controller');
     const authenticate = require('../middleware/authMiddleware');
     const checkPermission = require('../middleware/RBAC.Middleware');
+
   
-    router.get('/tickets', authenticate, ticketController.getAllTickets);
-    router.get('/tickets/:id', authenticate, ticketController.getTicketById);
-    router.post('/tickets', authenticate, checkPermission('create-ticket'), ticketController.createTicket);
-    router.put('/tickets/:id', authenticate, checkPermission('update-ticket'), ticketController.updateTicket);
-    router.delete('/tickets/:id', authenticate, checkPermission('delete-ticket'), ticketController.deleteTicket);
+    router.get("/tickets", ticketController.getAllTickets); 
+    router.get("/tickets/:id", ticketController.getTicketById);
+    router.get("/tickets/event/:event_id", ticketController.getTicketsByEvent);
+    router.post('/tickets', authenticate, checkPermission('create-ticket'), ticketController.createTickets);
+    router.put('/tickets/:id', authenticate, checkPermission('update-ticket'), ticketController.updateTicketById);
+    router.delete('/tickets/:id', authenticate, checkPermission('delete-ticket'), ticketController.deleteTicketById);
   
     app.use('/api', router);
   };

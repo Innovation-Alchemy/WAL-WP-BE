@@ -33,11 +33,8 @@ db.likes = require("./likes.model")(sequelize, Sequelize);
 db.views = require("./views.model")(sequelize, Sequelize);
 
 // Define Relationships
-db.User.hasMany(db.Event, { foreignKey: "user_id", onDelete: "CASCADE" });
-db.Event.belongsTo(db.User, { foreignKey: "user_id" });
-
-db.User.hasMany(db.Ticket, { foreignKey: "user_id", onDelete: "CASCADE" });
-db.Ticket.belongsTo(db.User, { foreignKey: "user_id" });
+db.User.hasMany(db.Event, { foreignKey: "organizer_id", onDelete: "CASCADE" });
+db.Event.belongsTo(db.User, { foreignKey: "organizer_id" });
 
 db.Event.hasMany(db.Ticket, { foreignKey: "event_id", onDelete: "CASCADE" });
 db.Ticket.belongsTo(db.Event, { foreignKey: "event_id" });

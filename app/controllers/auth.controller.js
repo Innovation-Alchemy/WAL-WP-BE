@@ -8,7 +8,8 @@ const transporter = require("../config/email.config");
 const { AuthVAlSchema, LoginVAlSchema,setPasswordSchema } = require("../utils/validations");
 const accountModels = { User: db.User,};
 require("dotenv").config();
-
+const fs = require('fs');
+const path = require('path');
 
 // ** Register User **
 exports.register = async (req, res) => {
@@ -330,65 +331,159 @@ exports.renderVerificationForm = async (req, res) => {
     }
 
     if (!account) {
-      return res.status(400).send('<h3>Invalid or expired token</h3>');
+      return res.status(400).send(`
+        <html>
+          <body style="background: linear-gradient(135deg, #ff0000, #000000); color: white; text-align: center; padding: 50px;">
+            <h3>Invalid or Expired Token</h3>
+            <p>The verification link is invalid or has expired. Please request a new one.</p>
+          </body>
+        </html>
+      `);
     }
 
-    // Serve the HTML form
-    res.send(`
+    const htmlContent = `
       <!DOCTYPE html>
-      <html>
+      <html lang="en">
       <head>
-        <title>Set Your Password</title>
-        <style>
-          body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 20px;
-            background-color: #f9f9f9;
-          }
-          form {
-            max-width: 400px;
-            margin: auto;
-            padding: 20px;
-            background: #fff;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-          }
-          input {
-            width: 80%;
-            padding: 10px;
-            margin-bottom: 15px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-          }
-          button {
-            width: 100%;
-            padding: 12px;
-            background-color: #007BFF;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 16px;
-          }
-          button:hover {
-            background-color: #0056b3;
-          }
-        </style>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Verify Email & Set Password</title>
+          <style>
+              body {
+                  font-family: Arial, sans-serif;
+                  margin: 0;
+                  padding: 0;
+                  background: linear-gradient(135deg, #ff0000, #000000);
+                  color: #ffffff;
+                  height: 100vh;
+                  display: flex;
+                  justify-content: center;
+                  align-items: center;
+              }
+              .container {
+                  background-color: rgba(0, 0, 0, 0.85);
+                  padding: 30px;
+                  border-radius: 10px;
+                  box-shadow: 0 4px 8px rgba(255, 255, 255, 0.1);
+                  text-align: center;
+                  max-width: 400px;
+                  width: 100%;
+              }
+              .container h1 {
+                  font-size: 24px;
+                  margin-bottom: 20px;
+              }
+              .container p {
+                  font-size: 16px;
+                  margin-bottom: 20px;
+              }
+              .container input {
+                  width: calc(100% - 20px);
+                  padding: 10px;
+                  margin: 10px auto;
+                  border: 1px solid #ff0000;
+                  border-radius: 5px;
+                  background-color: #333333;
+                  color: #ffffff;
+                  font-size: 14px;
+              }
+              .container button {
+                  background-color: #ff0000;
+                  color: #ffffff;
+                  border: none;
+                  padding: 10px 20px;
+                  font-size: 16px;
+                  border-radius: 5px;
+                  cursor: pointer;
+                  margin-top: 10px;
+              }
+              .container button:hover {
+                  background-color: #cc0000;
+              }
+              .message {
+                  display: none;
+                  padding: 10px;
+                  margin-top: 20px;
+                  border-radius: 5px;
+                  text-align: center;
+              }
+              .success {
+                  background-color: #28a745;
+                  color: #ffffff;
+              }
+              .error {
+                  background-color: #dc3545;
+                  color: #ffffff;
+              }
+          </style>
       </head>
       <body>
-        <form action="/api/auth/verify-email/set-password" method="POST">
-          <h2>Set Your Password</h2>
-          <input type="hidden" name="token" value="${token}" />
-          <input type="password" name="password" placeholder="Enter password" required />
-          <input type="password" name="confirmPassword" placeholder="Confirm password" required />
-          <button type="submit">Verify Account</button>
-        </form>
+          <div class="container">
+              <h1>Set Your Password</h1>
+              <p>Please enter your new password and confirm it below.</p>
+              <form id="passwordForm">
+                  <input type="hidden" id="token" name="token" value="${token}">
+                  <input type="password" id="password" name="password" placeholder="New Password" required>
+                  <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Confirm Password" required>
+                  <button type="submit">Verify Account</button>
+              </form>
+              <div id="message" class="message"></div>
+          </div>
+
+          <script>
+              const form = document.getElementById('passwordForm');
+              const password = document.getElementById('password');
+              const confirmPassword = document.getElementById('confirmPassword');
+              const messageDiv = document.getElementById('message');
+
+              form.addEventListener('submit', async (event) => {
+                  event.preventDefault();
+                  const token = document.getElementById('token').value;
+
+                  if (password.value !== confirmPassword.value) {
+                      messageDiv.className = 'message error';
+                      messageDiv.textContent = 'Passwords do not match.';
+                      messageDiv.style.display = 'block';
+                      return;
+                  }
+
+                  try {
+                      const response = await fetch('/api/auth/verify-email/set-password', {
+                          method: 'POST',
+                          headers: {
+                              'Content-Type': 'application/json',
+                          },
+                          body: JSON.stringify({
+                              token,
+                              password: password.value,
+                              confirmPassword: confirmPassword.value,
+                          }),
+                      });
+
+                      const result = await response.json();
+                      if (response.ok) {
+                          messageDiv.className = 'message success';
+                          messageDiv.textContent = result.message || 'Account verified successfully!';
+                      } else {
+                          messageDiv.className = 'message error';
+                          messageDiv.textContent = result.message || 'An error occurred. Please try again.';
+                      }
+                  } catch (error) {
+                      messageDiv.className = 'message error';
+                      messageDiv.textContent = 'A network error occurred. Please try again later.';
+                  }
+
+                  messageDiv.style.display = 'block';
+              });
+          </script>
       </body>
       </html>
-    `);
+    `;
+
+    res.send(htmlContent);
   } catch (error) {
     console.error('Error rendering verification form:', error);
     res.status(500).send('<h3>Something went wrong</h3>');
   }
 };
+

@@ -1,6 +1,9 @@
 const db = require("../models");
 const Event = db.Event;
+const Organizer = db.User;
+const { createEventSchema } = require("../utils/validations");
 
+// Get all events
 exports.getAllEvents = async (req, res) => {
   try {
     const events = await Event.findAll();
@@ -11,6 +14,7 @@ exports.getAllEvents = async (req, res) => {
   }
 };
 
+// Get event by ID
 exports.getEventById = async (req, res) => {
   try {
     const event = await Event.findByPk(req.params.id);
@@ -22,9 +26,56 @@ exports.getEventById = async (req, res) => {
   }
 };
 
+// Create a new event
 exports.createEvent = async (req, res) => {
+  const { error } = createEventSchema.validate(req.body);
+
+  // Return validation error if any
+  if (error) {
+    return res.status(400).json({ message: error.details[0].message });
+  }
+
   try {
-    const event = await Event.create(req.body);
+    const { organizer_id, title, description, date_time, location, seated, ticket_maps } = req.body;
+
+    // Check if the organizer exists
+    const organizerExists = await Organizer.findByPk(organizer_id);
+    if (!organizerExists) {
+      return res.status(404).json({ message: "Organizer not found" });
+    }
+
+    // Validate date_time logic
+    if (!Array.isArray(date_time) || date_time.length === 0) {
+      return res.status(400).json({ message: "Invalid date_time. At least a start_date is required." });
+    }
+    const start_date = date_time[0];
+    const end_date = date_time[1] || null;
+
+    // Validate location contains lat and lng
+    if (!location || !location.lat || !location.lng) {
+      return res.status(400).json({ message: "Invalid location data. Latitude and longitude are required." });
+    }
+
+    // Handle ticket_maps (file or URL)
+    let ticketMapPath = ticket_maps;
+    if (req.file) {
+      ticketMapPath =
+        process.env.NODE_ENV === "production"
+          ? `https://yourdomain.com/${req.file.path.replace(/\\/g, "/")}`
+          : `http://localhost:8080/${req.file.path.replace(/\\/g, "/")}`;
+    }
+
+    // Create the event
+    const event = await Event.create({
+      organizer_id,
+      title,
+      description,
+      date_time: { start_date, end_date },
+      location,
+      seated,
+      ticket_maps: ticketMapPath,
+    });
+
     res.status(201).json({ message: "Event created successfully", data: event });
   } catch (error) {
     console.error("Error creating event:", error);
@@ -32,19 +83,74 @@ exports.createEvent = async (req, res) => {
   }
 };
 
+
+// Update an event
 exports.updateEvent = async (req, res) => {
   try {
     const event = await Event.findByPk(req.params.id);
     if (!event) return res.status(404).json({ message: "Event not found" });
 
-    await event.update(req.body);
-    res.status(200).json({ message: "Event updated successfully", data: event });
+    const updates = {};
+    const { title, description, date_time, location, seated, ticket_maps } = req.body;
+
+    // Update title if provided
+    if (title) updates.title = title;
+
+    // Update description if provided
+    if (description) updates.description = description;
+
+    // Validate and update date_time if provided
+    if (date_time) {
+      if (!Array.isArray(date_time) || date_time.length === 0) {
+        return res.status(400).json({ message: "Invalid date_time. At least a start_date is required." });
+      }
+      updates.date_time = {
+        start_date: date_time[0],
+        end_date: date_time[1] || null,
+      };
+    }
+
+    // Validate and update location if provided
+    if (location) {
+      const currentLocation = event.location || {};
+      if (location.lat !== undefined) currentLocation.lat = location.lat;
+      if (location.lng !== undefined) currentLocation.lng = location.lng;
+      updates.location = currentLocation;
+    }
+
+    // Update seated if provided
+    if (seated !== undefined) updates.seated = seated;
+
+    // Handle ticket_maps update
+    if (req.file) {
+      // File upload scenario
+      updates.ticket_maps =
+        process.env.NODE_ENV === "production"
+          ? `https://yourdomain.com/${req.file.path.replace(/\\/g, "/")}`
+          : `http://localhost:8080/${req.file.path.replace(/\\/g, "/")}`;
+    } else if (ticket_maps) {
+      // URL scenario
+      if (!/^https?:\/\/.+$/.test(ticket_maps)) {
+        return res.status(400).json({ message: "Invalid URL format for ticket_maps." });
+      }
+      updates.ticket_maps = ticket_maps;
+    }
+
+    // Perform the update
+    await event.update(updates);
+
+    // Fetch the updated event to return
+    const updatedEvent = await Event.findByPk(event.id);
+
+    res.status(200).json({ message: "Event updated successfully", data: updatedEvent });
   } catch (error) {
     console.error("Error updating event:", error);
     res.status(500).json({ message: "Error updating event", error: error.message });
   }
 };
 
+
+// Delete an event
 exports.deleteEvent = async (req, res) => {
   try {
     const event = await Event.findByPk(req.params.id);

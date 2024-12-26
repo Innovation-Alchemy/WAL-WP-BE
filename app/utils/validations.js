@@ -401,7 +401,7 @@ const setPasswordSchema = Joi.object({
   confirmPassword: Joi.string().valid(Joi.ref("password")).required(),
 });
 
-// Validation schema for creating a product
+// input validation for creating a product
 const createProductSchema = Joi.object({
   user_id: Joi.number().integer().required().messages({
     "number.base": "User ID must be a number.",
@@ -422,6 +422,84 @@ const createProductSchema = Joi.object({
   }),
 });
 
+// input validation for creating an event
+const createEventSchema = Joi.object({
+  organizer_id: Joi.number().integer().required().messages({
+    "number.base": "Organizer ID must be an integer.",
+    "any.required": "Organizer ID is required.",
+  }),
+  title: Joi.string().min(3).max(100).required().messages({
+    "string.base": "Title must be a string.",
+    "string.min": "Title must be at least 3 characters long.",
+    "string.max": "Title cannot exceed 100 characters.",
+    "any.required": "Title is required.",
+  }),
+  description: Joi.string().required().messages({
+    "string.base": "Description must be a string.",
+    "any.required": "Description is required.",
+  }),
+  date_time: Joi.array().items(Joi.date().iso().required()).min(1).required().messages({
+    "array.base": "Date and time must be an array of valid ISO dates.",
+    "array.min": "At least one date and time must be provided.",
+    "any.required": "Date and time are required.",
+  }),
+  location: Joi.object({
+    lat: Joi.number().required().messages({
+      "number.base": "Latitude must be a number.",
+      "any.required": "Latitude is required.",
+    }),
+    lng: Joi.number().required().messages({
+      "number.base": "Longitude must be a number.",
+      "any.required": "Longitude is required.",
+    }),
+  }).required().messages({
+    "object.base": "Location must be an object with lat and lng.",
+    "any.required": "Location is required.",
+  }),
+  seated: Joi.boolean().required().messages({
+    "boolean.base": "Seated must be a boolean value.",
+    "any.required": "Seated is required.",
+  }),
+  ticket_maps: Joi.alternatives()
+    .try(
+      Joi.string().uri().messages({ "string.uri": "Ticket maps must be a valid URL." }),
+      Joi.string().allow(null, "").messages({ "string.base": "Ticket maps can be an optional file upload." })
+    )
+    .messages({
+      "alternatives.types": "Ticket maps must be either a valid URL or an uploaded file.",
+    }),
+});
+
+
+// input validation for creating tickets
+const createTicketsSchema = Joi.object({
+  event_id: Joi.number().integer().required(),
+  price: Joi.array()
+    .items(
+      Joi.object({
+        color: Joi.string().required(),
+        price: Joi.number().required(),
+      })
+    )
+    .required(),
+  section: Joi.array()
+    .items(
+      Joi.object({
+        color: Joi.string().required(),
+        section: Joi.array().items(Joi.string()).required(),
+      })
+    )
+    .required(),
+  total_seats: Joi.array()
+    .items(
+      Joi.object({
+        section: Joi.string().required(),
+        seats: Joi.number().integer().required(),
+      })
+    )
+    .required(),
+});
+
   module.exports = {
     AuthVAlSchema,
     LoginVAlSchema,
@@ -438,5 +516,7 @@ const createProductSchema = Joi.object({
     createCouponSchema,
     applyCouponSchema,
     createBlogSchema,
-    createProductSchema
+    createProductSchema,
+    createEventSchema,
+    createTicketsSchema
 };
