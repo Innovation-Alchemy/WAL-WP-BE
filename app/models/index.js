@@ -31,10 +31,17 @@ db.profile_Details= require ("./profile_details.model")(sequelize, Sequelize);
 db.comments = require("./comments.model")(sequelize, Sequelize);
 db.likes = require("./likes.model")(sequelize, Sequelize);
 db.views = require("./views.model")(sequelize, Sequelize);
+db.TicketsSold = require("./tickets_sold.model")(sequelize, Sequelize);
 
 // Define Relationships
 db.User.hasMany(db.Event, { foreignKey: "organizer_id", onDelete: "CASCADE" });
 db.Event.belongsTo(db.User, { foreignKey: "organizer_id" });
+ 
+db.Ticket.hasMany(db.TicketsSold, { foreignKey: "ticket_id", onDelete: "CASCADE" });
+db.TicketsSold.belongsTo(db.Ticket, { foreignKey: "ticket_id" });
+
+db.User.hasMany(db.TicketsSold, { foreignKey: "buyer_id", onDelete: "CASCADE" });
+db.TicketsSold.belongsTo(db.User, { foreignKey: "buyer_id" });
 
 db.Event.hasMany(db.Ticket, { foreignKey: "event_id", onDelete: "CASCADE" });
 db.Ticket.belongsTo(db.Event, { foreignKey: "event_id" });

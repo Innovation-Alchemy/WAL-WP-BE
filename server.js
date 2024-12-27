@@ -42,6 +42,7 @@ require("./app/routes/category.routes")(app);
 require("./app/routes/coupon.routes")(app);
 require("./app/routes/event.routes")(app);
 require("./app/routes/ticket.routes")(app);
+require("./app/routes/tickets_sold.routes")(app);
 require("./app/routes/permission.routes")(app);
 require("./app/routes/auth.routes")(app);
 require("./app/routes/hobby.routes")(app);

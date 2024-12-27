@@ -474,6 +474,7 @@ const createEventSchema = Joi.object({
 // input validation for creating tickets
 const createTicketsSchema = Joi.object({
   event_id: Joi.number().integer().required(),
+  amount_issued: Joi.number().integer().required(), // Total tickets issued
   price: Joi.array()
     .items(
       Joi.object({
@@ -495,9 +496,30 @@ const createTicketsSchema = Joi.object({
       Joi.object({
         section: Joi.string().required(),
         seats: Joi.number().integer().required(),
+        color: Joi.string().required(), 
       })
     )
     .required(),
+});
+
+// input validation for reserving 
+const reserveTicketSchema = Joi.object({
+  ticket_id: Joi.number().integer().required(),
+  buyer_id: Joi.number().integer().required(),
+  section: Joi.string().required(),
+  color: Joi.string().required(),
+  amount: Joi.number().integer().min(1).required(), // Number of tickets to reserve
+  seat_number: Joi.array().items(Joi.string()).min(1).required(), // List of seat numbers
+});
+
+// input validation for confirming
+const confirmPurchaseSchema = Joi.object({
+  ticket_sold_id: Joi.number().integer().required(),
+});
+
+// input validation for canceling reservation
+const cancelReservationSchema = Joi.object({
+  ticket_sold_id: Joi.number().integer().required(),
 });
 
   module.exports = {
@@ -518,5 +540,8 @@ const createTicketsSchema = Joi.object({
     createBlogSchema,
     createProductSchema,
     createEventSchema,
-    createTicketsSchema
+    createTicketsSchema,
+    reserveTicketSchema,
+    confirmPurchaseSchema,
+    cancelReservationSchema
 };

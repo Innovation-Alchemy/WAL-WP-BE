@@ -35,18 +35,39 @@ exports.createTickets = async (req, res) => {
   if (error) return res.status(400).json({ message: error.details[0].message });
 
   try {
-    const { event_id, price, section, total_seats } = req.body;
+    const { event_id, price, section, total_seats, amount_issued } = req.body;
 
     // Validate event existence
     const event = await Event.findByPk(event_id);
     if (!event) return res.status(404).json({ message: "Event not found" });
 
-    // Create tickets
+    // Check if tickets are already issued for this event
+    const existingTickets = await Tickets.findOne({ where: { event_id } });
+    if (existingTickets) {
+      return res.status(400).json({
+        message: "Tickets have already been issued for this event.",
+      });
+    }
+
+    // Calculate the total number of seats from total_seats array
+    const totalSeatsCount = total_seats.reduce((sum, seat) => sum + seat.seats, 0);
+
+    // Check if total_seats exceeds amount_issued
+    if (totalSeatsCount > amount_issued) {
+      return res.status(400).json({
+        message: "Total seats cannot exceed the amount issued.",
+        data: { totalSeatsCount, amount_issued },
+      });
+    }
+
+    // Create tickets with issued_at set automatically
     const tickets = await Tickets.create({
       event_id,
       price,
       section,
       total_seats,
+      amount_issued,
+      issued_at: new Date(),
     });
 
     res.status(201).json({ message: "Tickets created successfully", data: tickets });
@@ -56,18 +77,35 @@ exports.createTickets = async (req, res) => {
   }
 };
 
+
 // Update Ticket by Ticket ID
 exports.updateTicketById = async (req, res) => {
-  
   try {
-    // Find the ticket by ID
     const ticket = await Tickets.findByPk(req.params.id);
     if (!ticket) return res.status(404).json({ message: "Ticket not found" });
 
-    // Update ticket data
-    await ticket.update(req.body);
+    const { total_seats, amount_issued } = req.body;
 
-    res.status(200).json({ message: "Ticket updated successfully", data: ticket });
+    // If total_seats or amount_issued is being updated, validate them
+    if (total_seats || amount_issued) {
+      const newTotalSeatsCount = total_seats
+        ? total_seats.reduce((sum, seat) => sum + seat.seats, 0)
+        : ticket.total_seats.reduce((sum, seat) => sum + seat.seats, 0);
+
+      const newAmountIssued = amount_issued || ticket.amount_issued;
+
+      if (newTotalSeatsCount > newAmountIssued) {
+        return res.status(400).json({
+          message: "Total seats cannot exceed the amount issued.",
+          data: { totalSeatsCount: newTotalSeatsCount, amountIssued: newAmountIssued },
+        });
+      }
+    }
+
+    // Update ticket data
+    const updatedTicket = await ticket.update(req.body);
+
+    res.status(200).json({ message: "Ticket updated successfully", data: updatedTicket });
   } catch (error) {
     console.error("Error updating ticket:", error);
     res.status(500).json({ message: "Error updating ticket", error: error.message });

@@ -29,7 +29,6 @@ module.exports = (sequelize, Sequelize) => {
       type: Sequelize.JSON, // Array of {section, seats}
       allowNull: false,
     },
-   
   });
 
   return Tickets;
