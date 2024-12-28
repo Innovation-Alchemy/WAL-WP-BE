@@ -5,8 +5,9 @@ module.exports = (app) => {
     const profileController = require("../controllers/profile_details.controller");
     const authenticate = require("../middleware/authMiddleware");
     const checkPermission = require("../middleware/RBAC.Middleware");
-    const upload = require("../middleware/uploadMiddleware"); // Multer middleware for handling file uploads
+    const upload = require("../middleware/uploadMiddleware"); 
   
+    // everyone can create update a profile but only admin can delete a profile
     router.get("/profiles", authenticate, profileController.getAllProfiles);
     router.get("/profiles/:id", authenticate, profileController.getProfileById);
     router.post(

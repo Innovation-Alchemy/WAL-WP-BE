@@ -4,7 +4,9 @@ module.exports = (app) => {
     const couponController = require('../controllers/coupon.controller');
     const authenticate = require('../middleware/authMiddleware');
     const checkPermission = require('../middleware/RBAC.Middleware');
-  
+
+
+// only admin can create a coupon update and delete it  
     router.get('/coupons', authenticate, couponController.getAllCoupons);
     router.get('/coupons/:id', authenticate, couponController.getCouponById);
     router.post('/coupons', authenticate, checkPermission('create-coupon'), couponController.createCoupon);

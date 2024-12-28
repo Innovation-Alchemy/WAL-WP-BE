@@ -4,6 +4,7 @@ module.exports = (app) => {
   const permissionController = require('../controllers/permission.controller');
   const checkPermission = require('../middleware/RBAC.Middleware');
   const authenticate = require('../middleware/authMiddleware');
+  // only admin can create update and delete assign and remove permission while everyone can read it
 
   // ** Get all permissions **
   router.get('/permissions', authenticate, checkPermission('read-permission'), permissionController.getAllPermissions);

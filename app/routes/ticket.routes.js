@@ -5,7 +5,8 @@ module.exports = (app) => {
     const authenticate = require('../middleware/authMiddleware');
     const checkPermission = require('../middleware/RBAC.Middleware');
 
-  
+
+    // only admin and organizer can create ,update and delete tickets 
     router.get("/tickets", ticketController.getAllTickets); 
     router.get("/tickets/:id", ticketController.getTicketById);
     router.get("/tickets/event/:event_id", ticketController.getTicketsByEvent);

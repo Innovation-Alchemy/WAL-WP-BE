@@ -98,3 +98,10 @@ WAL-WP-BE/
 ├── app.js
 ├── package.json
 ├── .env
+
+notes:
+for auth:
+1- in register method the user can only register as an Organizer or user 
+2- the admin can create any user role.
+3- when registered as an organizer he needs approval by admin, user does not need approval.
+4- the organizer can only create an operator.{does not need approval}

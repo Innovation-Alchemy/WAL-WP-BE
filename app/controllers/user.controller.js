@@ -5,6 +5,7 @@ const crypto = require("crypto");
 const transporter = require("../config/email.config");
 const { Op } = require("sequelize");
 const {CreateUserValidationSchema} = require("../utils/validations");
+const {assignDefaultPermissions}= require ("../utils/assigning_permissions_by_default");
 require("dotenv").config();
 
 exports.getAllUsers = async (req, res) => {
@@ -66,6 +67,9 @@ exports.createUser = async (req, res) => {
       TokenExpires: tokenExpiry, // Save the expiry
     });
 
+       // Assign default permissions based on role
+   await assignDefaultPermissions(newUser.id, role);
+
     // Construct the verification link for the set password page
     const verificationLink = `${process.env.BACKEND_URL}/api/auth/verify-email/render-verfication/${token}`;
 
@@ -123,7 +127,6 @@ exports.createUser = async (req, res) => {
   }
 };
 
-
 exports.updateUser = async (req, res) => {
   try {
     const userId = req.params.id;
@@ -177,7 +180,8 @@ exports.updateUser = async (req, res) => {
       profile_picture: profile_picture !== undefined ? profile_picture : user.profile_picture,
       password: password ? await bcrypt.hash(password, 10) : user.password, // Hash password if provided
     });
-
+// Assign default permissions based on role
+await assignDefaultPermissions(user.id, role);
     res.status(200).json({
       message: "User updated successfully",
       data: {

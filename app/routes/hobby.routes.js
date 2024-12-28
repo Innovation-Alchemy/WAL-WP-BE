@@ -3,6 +3,10 @@ module.exports = (app) => {
     const router = express.Router();
     const hobbyController = require('../controllers/hobby.controller');
     const authenticate = require('../middleware/authMiddleware');
+    const checkPermission = require('../middleware/RBAC.Middleware');
+
+
+    // only admin can create update and delete hobbies
   
     // ** Get all hobbies **
     router.get('/hobbies', authenticate, hobbyController.getAllHobbies);
@@ -11,7 +15,7 @@ module.exports = (app) => {
     router.get('/hobbies/:id', authenticate, hobbyController.getHobbyById);
 
     // ** Add a new hobby **
-    router.post('/hobbies', authenticate, hobbyController.addHobby);
+    router.post('/hobbies', authenticate,checkPermission('create-hobbies'), hobbyController.addHobby);
   
     // ** Assign hobbies to a user **
     router.post('/hobbies/assign/:id', authenticate, hobbyController.assignHobbiesToUser);
@@ -20,10 +24,10 @@ module.exports = (app) => {
     router.post('/hobbies/remove/:id', authenticate, hobbyController.removeHobbiesFromUser);
 
     // ** Update a hobby **
-    router.put('/hobbies/:id', authenticate, hobbyController.updateHobby);
+    router.put('/hobbies/:id', authenticate,checkPermission('update-hobbies'), hobbyController.updateHobby);
 
     // ** Delete a hobby **
-    router.delete('/hobbies/:id', authenticate, hobbyController.deleteHobby);
+    router.delete('/hobbies/:id', authenticate,checkPermission('delete-hobbies'), hobbyController.deleteHobby);
  
   
     app.use('/api', router);

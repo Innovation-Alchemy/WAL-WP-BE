@@ -52,10 +52,10 @@ const AuthVAlSchema = Joi.object({
       'any.only': 'Gender must be either "Male" or "Female".',
     }),
   role: Joi.string()
-    .valid('Admin', 'Organizer', 'Operator', 'User')
+    .valid( 'Organizer', 'User') // only user and organizer can register as an admin an admin must create and as an operator the organizer creates it
     .required()
     .messages({
-      'any.only': 'Role must be one of Admin, Organizer, Operator, or User.',
+      'any.only': 'Role must be one of  Organizer or User.',
       'any.required': 'Role is required.',
     }),
 });

@@ -4,7 +4,9 @@ module.exports = (app) => {
     const productController = require("../controllers/product.controller");
     const authenticate = require("../middleware/authMiddleware");
     const checkPermission = require("../middleware/RBAC.Middleware");
-    const upload = require("../middleware/uploadMiddleware"); // Multer middleware for handling file uploads
+    const upload = require("../middleware/uploadMiddleware"); 
+
+    // only admin and opertaor can create update and delete a product 
 
     // Get all products
     router.get("/products",authenticate, productController.getAllProducts);

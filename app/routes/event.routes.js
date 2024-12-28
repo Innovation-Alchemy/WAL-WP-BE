@@ -6,7 +6,8 @@ module.exports = (app) => {
     const checkPermission = require('../middleware/RBAC.Middleware');
     const upload = require("../middleware/uploadMiddleware");
 
-
+// everyone can see events but only admin can create update and delete it 
+// while organizer need approval after creating it and he can update certain feilds so we need a new route for update for organizer
     router.get('/events', authenticate, eventController.getAllEvents);
     router.get('/events/:id', authenticate, eventController.getEventById);
     router.post('/events', authenticate,upload.single("ticket_maps"), checkPermission('create-event'), eventController.createEvent);

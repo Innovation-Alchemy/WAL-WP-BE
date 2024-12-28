@@ -6,10 +6,10 @@ const { generateToken } = require("../utils/generateToken");
 const User = db.User;
 const transporter = require("../config/email.config");
 const { AuthVAlSchema, LoginVAlSchema,setPasswordSchema } = require("../utils/validations");
+const {assignDefaultPermissions}= require ("../utils/assigning_permissions_by_default");
 const accountModels = { User: db.User,};
 require("dotenv").config();
-const fs = require('fs');
-const path = require('path');
+
 
 // ** Register User **
 exports.register = async (req, res) => {
@@ -42,6 +42,9 @@ exports.register = async (req, res) => {
       gender,
       role,
     });
+
+   // Assign default permissions based on role
+   await assignDefaultPermissions(newUser.id, role);
 
     // Generate a verification token
     const { token, TokenExpires } = generateToken(newUser);
