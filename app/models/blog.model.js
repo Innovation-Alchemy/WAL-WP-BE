@@ -35,7 +35,11 @@ module.exports = (sequelize, Sequelize) => {
         type: Sequelize.TEXT,
         allowNull: true,
       },
-     
+      is_approved: {
+        type: Sequelize.BOOLEAN,
+        allowNull: false,
+        defaultValue: false, // Default is not approved
+      },
     },
     { timestamps: true }
   );

@@ -36,7 +36,17 @@ exports.createEvent = async (req, res) => {
   }
 
   try {
-    const { organizer_id, title, description, date_time, location, seated, ticket_maps } = req.body;
+    const {
+      organizer_id,
+      title,
+      description,
+      date_time,
+      location,
+      seated,
+      ticket_maps,
+      commission,
+      is_approved,
+    } = req.body;
 
     // Check if the organizer exists
     const organizerExists = await Organizer.findByPk(organizer_id);
@@ -46,14 +56,18 @@ exports.createEvent = async (req, res) => {
 
     // Validate date_time logic
     if (!Array.isArray(date_time) || date_time.length === 0) {
-      return res.status(400).json({ message: "Invalid date_time. At least a start_date is required." });
+      return res.status(400).json({
+        message: "Invalid date_time. At least a start_date is required.",
+      });
     }
     const start_date = date_time[0];
     const end_date = date_time[1] || null;
 
     // Validate location contains lat and lng
     if (!location || !location.lat || !location.lng) {
-      return res.status(400).json({ message: "Invalid location data. Latitude and longitude are required." });
+      return res.status(400).json({
+        message: "Invalid location data. Latitude and longitude are required.",
+      });
     }
 
     // Handle ticket_maps (file or URL)
@@ -65,6 +79,16 @@ exports.createEvent = async (req, res) => {
           : `http://localhost:8080/${req.file.path.replace(/\\/g, "/")}`;
     }
 
+    // Determine is_approved value
+    const userRole = organizerExists.role; // Assuming organizerExists has the user's role
+    const approvalStatus =
+      userRole === "Admin"
+        ? true // Admin-created events are automatically approved
+        : is_approved || false; // Use provided value if available; default to false
+
+    // Set the commission percentage
+    const eventCommission = commission || 3.0; // Default to 3% if not provided
+
     // Create the event
     const event = await Event.create({
       organizer_id,
@@ -74,15 +98,19 @@ exports.createEvent = async (req, res) => {
       location,
       seated,
       ticket_maps: ticketMapPath,
+      commission: eventCommission,
+      is_approved: approvalStatus,
     });
 
     res.status(201).json({ message: "Event created successfully", data: event });
   } catch (error) {
     console.error("Error creating event:", error);
-    res.status(500).json({ message: "Error creating event", error: error.message });
+    res.status(500).json({
+      message: "Error creating event",
+      error: error.message,
+    });
   }
 };
-
 
 // Update an event
 exports.updateEvent = async (req, res) => {
@@ -91,13 +119,19 @@ exports.updateEvent = async (req, res) => {
     if (!event) return res.status(404).json({ message: "Event not found" });
 
     const updates = {};
-    const { title, description, date_time, location, seated, ticket_maps } = req.body;
+    const { title, description, date_time, location, seated, ticket_maps , commission, is_approved} = req.body;
 
     // Update title if provided
     if (title) updates.title = title;
 
     // Update description if provided
     if (description) updates.description = description;
+
+    //Update commision if provided
+    if(commission) updates.commission= commission
+
+    //Update is_approved if provided
+    if(is_approved) updates.is_approved= is_approved
 
     // Validate and update date_time if provided
     if (date_time) {
@@ -115,6 +149,7 @@ exports.updateEvent = async (req, res) => {
       const currentLocation = event.location || {};
       if (location.lat !== undefined) currentLocation.lat = location.lat;
       if (location.lng !== undefined) currentLocation.lng = location.lng;
+      if (location.address!=undefined) currentLocation.address = location.address;
       updates.location = currentLocation;
     }
 

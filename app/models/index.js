@@ -32,6 +32,8 @@ db.comments = require("./comments.model")(sequelize, Sequelize);
 db.likes = require("./likes.model")(sequelize, Sequelize);
 db.views = require("./views.model")(sequelize, Sequelize);
 db.TicketsSold = require("./tickets_sold.model")(sequelize, Sequelize);
+db.ProductPurchase = require("./product_purchase.model")(sequelize, Sequelize);
+db.notification =require("./notification.model")(sequelize, Sequelize);
 
 // Define Relationships
 db.User.hasMany(db.Event, { foreignKey: "organizer_id", onDelete: "CASCADE" });
@@ -60,6 +62,15 @@ db.Coupon.belongsTo(db.Product, { foreignKey: "product_id" });
 
 db.User.hasMany(db.Coupon, { foreignKey: "user_id", onDelete: "CASCADE" });
 db.Coupon.belongsTo(db.User, { foreignKey: "user_id" });
+
+// Product and ProductPurchase (one-to-many)
+db.Product.hasMany(db.ProductPurchase, { foreignKey: "product_id", onDelete: "CASCADE" });
+db.ProductPurchase.belongsTo(db.Product, { foreignKey: "product_id" });
+
+// User and ProductPurchase (one-to-many)
+db.User.hasMany(db.ProductPurchase, { foreignKey: "user_id", onDelete: "CASCADE" });
+db.ProductPurchase.belongsTo(db.User, { foreignKey: "user_id" });
+
 
 // User and Permissions (one-to-one)
 db.User.hasOne(db.Permission, { foreignKey: "permissions", onDelete: "CASCADE" });

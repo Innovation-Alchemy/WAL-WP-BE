@@ -29,6 +29,9 @@ module.exports = (app) => {
     // does not require authentication or permission because every can log out
     router.post("/auth/logout", authController.logout);
 
+    // Route to request organizer role
+    router.post("/auth/request-organizer", authenticate, authController.requestOrganizerRole);
+
     // ** Approve **
     router.post("/auth/approve/:id",authenticate,checkPermission('auth-approve'), authController.approveUser);
   

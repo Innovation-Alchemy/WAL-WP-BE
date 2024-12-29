@@ -1,5 +1,6 @@
 const db = require("../models");
 const Blog = db.Blog;
+const User= db.User;
 const {createBlogSchema}= require('../utils/validations');
 
 /**
@@ -41,7 +42,13 @@ exports.createBlog = async (req, res) => {
   }
 
   try {
-    const { user_id, event_id, title, content, tags, description } = req.body;
+    const { user_id, event_id, title, content, tags, description,is_approved, } = req.body;
+    
+ // Check if the organizer exists
+ const userExists = await User.findByPk(user_id);
+ if (!userExists) {
+   return res.status(404).json({ message: "Organizer not found" });
+ }
 
     // Handle uploaded files
     let files = [];
@@ -53,6 +60,13 @@ exports.createBlog = async (req, res) => {
       );
     }
 
+     // Determine is_approved value
+     const userRole = userExists.role; // Assuming userExists has the user's role
+     const approvalStatus =
+       userRole === "Admin"
+         ? true // Admin-created events are automatically approved
+         : is_approved || false; // Use provided value if available; default to false
+
     // Create the blog in the database
     const blog = await Blog.create({
       user_id,
@@ -62,6 +76,7 @@ exports.createBlog = async (req, res) => {
       tags: tags ? JSON.parse(tags) : [], // Parse tags if sent as a JSON string
       files, // Save file URLs
       description,
+      is_approved: approvalStatus,
     });
 
     res.status(201).json({ message: "Blog created successfully", data: blog });
@@ -82,7 +97,7 @@ exports.updateBlog = async (req, res) => {
     const blog = await Blog.findByPk(id);
     if (!blog) return res.status(404).json({ message: "Blog not found" });
 
-    const { title, content, tags, description } = req.body;
+    const { title, content, tags, description ,is_approved,} = req.body;
 
     // Parse existing files if necessary
     let existingFiles = [];
@@ -115,6 +130,7 @@ exports.updateBlog = async (req, res) => {
       ...(content && { content }),
       ...(tags && { tags: JSON.parse(tags) }), // Replace tags array if provided
       ...(description && { description }),
+      ...(is_approved && {is_approved}),
       files: updatedFiles, // Update the files array
     });
 

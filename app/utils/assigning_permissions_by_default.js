@@ -19,18 +19,21 @@ const assignDefaultPermissions = async (userId, role) => {
            "create-coupon","update-coupon","delete-coupon",
            "create-product","update-product","delete-product",
            "create-operataor",
+           "read-product-purchase","create-product-purchase","update-product-purchase","delete-product-purchase",
            "create-profile", "update-profile",  "read-permission"
           ].includes(perm.name)
         )
         .map((perm) => perm.id),
       Operator: allPermissions
         .filter((perm) =>
-          ["create-profile", "update-profile", "read-permission"].includes(perm.name)
+          ["create-profile", "update-profile", "read-permission",
+          "read-product-purchase","create-product-purchase","update-product-purchase","delete-product-purchase"].includes(perm.name)
         )
         .map((perm) => perm.id),
       User: allPermissions
         .filter((perm) =>
-          ["create-profile", "update-profile", "read-permission"].includes(perm.name)
+          ["create-profile", "update-profile", "read-permission",
+          "read-product-purchase","create-product-purchase","update-product-purchase","delete-product-purchase"].includes(perm.name)
         )
         .map((perm) => perm.id),
     };

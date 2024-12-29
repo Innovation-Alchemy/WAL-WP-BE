@@ -413,14 +413,71 @@ const createProductSchema = Joi.object({
     "string.max": "Name cannot exceed 100 characters.",
     "any.required": "Name is required.",
   }),
-  description: Joi.string().allow(null, "").max(255).messages({
+  description: Joi.string().allow(null).max(255).messages({
     "string.base": "Description must be a string.",
     "string.max": "Description cannot exceed 255 characters.",
   }),
-  image: Joi.string().uri().allow(null, "").messages({
-    "string.uri": "Image must be a valid URL.",
+  image: Joi.array()
+    .items(Joi.string().uri().messages({
+      "string.uri": "Each image must be a valid URL.",
+    }))
+    .allow(null)
+    .messages({
+      "array.base": "Image must be an array of valid URLs.",
+    }),
+  price: Joi.array()
+    .items(Joi.number().min(0).required())
+    .min(1)
+    .required()
+    .messages({
+      "array.base": "Price must be an array of numbers.",
+      "number.base": "Each price must be a number.",
+      "array.min": "At least one price is required.",
+      "any.required": "Price is required.",
+    }),
+  size: Joi.array()
+    .items(Joi.string().min(1).required().messages({
+      "string.base": "Size must be a string.",
+      "string.min": "Each size must be at least 1 character long.",
+      "any.required": "Each size is required.",
+    }))
+    .min(1)
+    .required()
+    .messages({
+      "array.base": "Size must be an array of strings.",
+      "array.min": "At least one size is required.",
+      "any.required": "Size is required.",
+    }),
+  color: Joi.array()
+    .items(Joi.string().min(1).required().messages({
+      "string.base": "Color must be a string.",
+      "string.min": "Each color must be at least 1 character long.",
+      "any.required": "Each color is required.",
+    }))
+    .min(1)
+    .required()
+    .messages({
+      "array.base": "Color must be an array of strings.",
+      "array.min": "At least one color is required.",
+      "any.required": "Color is required.",
+    }),
+  commission: Joi.number().min(0).max(100).optional().messages({
+    "number.base": "Commission must be a number.",
+    "number.min": "Commission cannot be less than 0%.",
+    "number.max": "Commission cannot exceed 100%.",
+  }),
+  is_approved: Joi.boolean().optional().messages({
+    "boolean.base": "Is approved must be a boolean value.",
+  }),
+  stock_alert: Joi.number().integer().min(1).required().messages({
+    "number.base": "Stock alert must be a number.",
+    "number.integer": "Stock alert must be an integer.",
+    "number.min": "Stock alert must be at least 1.",
+    "any.required": "Stock alert is required.",
   }),
 });
+
+
 
 // input validation for creating an event
 const createEventSchema = Joi.object({
@@ -452,8 +509,12 @@ const createEventSchema = Joi.object({
       "number.base": "Longitude must be a number.",
       "any.required": "Longitude is required.",
     }),
+    address: Joi.string().required().messages({
+      "string.base": "Address must be a string.",
+      "any.required": "Address is required.",
+    }),
   }).required().messages({
-    "object.base": "Location must be an object with lat and lng.",
+    "object.base": "Location must be an object with lat, lng, and address.",
     "any.required": "Location is required.",
   }),
   seated: Joi.boolean().required().messages({
@@ -468,7 +529,16 @@ const createEventSchema = Joi.object({
     .messages({
       "alternatives.types": "Ticket maps must be either a valid URL or an uploaded file.",
     }),
+  commission: Joi.number().min(0).max(100).optional().messages({
+    "number.base": "Commission must be a number.",
+    "number.min": "Commission cannot be less than 0%.",
+    "number.max": "Commission cannot exceed 100%.",
+  }),
+  is_approved: Joi.boolean().optional().messages({
+    "boolean.base": "Is approved must be a boolean value.",
+  }),
 });
+
 
 
 // input validation for creating tickets

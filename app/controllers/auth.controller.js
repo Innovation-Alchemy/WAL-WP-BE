@@ -490,3 +490,44 @@ exports.renderVerificationForm = async (req, res) => {
   }
 };
 
+exports.requestOrganizerRole = async (req, res) => {
+  try {
+    const { user_id, message } = req.body;
+
+    // Find the user making the request
+    const user = await User.findByPk(user_id);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Get admin email (assuming you have an admin user or a default admin email in the .env)
+    const adminEmail = process.env.EMAIL_USER || "admin@example.com";
+
+    // Prepare the email content
+    const mailOptions = {
+      from: user.email,
+      to: adminEmail,
+      subject: "Organizer Role Request",
+      html: `
+        <h3>Organizer Role Request</h3>
+        <p><strong>User Name:</strong> ${user.name}</p>
+        <p><strong>User Email:</strong> ${user.email}</p>
+        <p><strong>Message:</strong> ${message}</p>
+        <p>Please review the request and take the necessary action in the admin panel.</p>
+      `,
+    };
+
+    // Send the email
+    await transporter.sendMail(mailOptions);
+
+    res.status(200).json({
+      message: "Request to become an organizer has been sent to the admin.",
+    });
+  } catch (error) {
+    console.error("Error sending organizer request email:", error);
+    res.status(500).json({
+      message: "An error occurred while sending the organizer request email.",
+      error: error.message,
+    });
+  }
+};

@@ -21,8 +21,40 @@ module.exports = (sequelize, Sequelize) => {
         allowNull: true,
       },
       image: {
-        type: Sequelize.STRING,
+        type: Sequelize.JSON, 
         allowNull: true,
+      },
+      price:  {
+        type: Sequelize.JSON, 
+        allowNull: false,
+      },
+      size: {
+        type: Sequelize.JSON, 
+        allowNull: false,
+      },
+      color: {
+        type: Sequelize.JSON, 
+        allowNull: false,
+      },
+      commission: {
+        type: Sequelize.DECIMAL(5, 2), // Percentage as a decimal value
+        allowNull: false,
+        defaultValue: 100.0, // Default commission is 100%
+      },
+      is_approved: {
+        type: Sequelize.BOOLEAN,
+        allowNull: false,
+        defaultValue: false, // Default is not approved
+      },
+      quantity_in_stock: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        defaultValue: 10      
+      },
+      stock_alert: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        defaultValue: 10  
       },
     },
     { timestamps: true }
