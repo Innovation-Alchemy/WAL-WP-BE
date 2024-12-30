@@ -478,7 +478,6 @@ const createProductSchema = Joi.object({
 });
 
 
-
 // input validation for creating an event
 const createEventSchema = Joi.object({
   organizer_id: Joi.number().integer().required().messages({
@@ -537,13 +536,15 @@ const createEventSchema = Joi.object({
   is_approved: Joi.boolean().optional().messages({
     "boolean.base": "Is approved must be a boolean value.",
   }),
+  ticket_alert:Joi.number().optional().messages({
+    "number.base": "ticket alert must be a number.",
+  }),
 });
-
-
 
 // input validation for creating tickets
 const createTicketsSchema = Joi.object({
   event_id: Joi.number().integer().required(),
+  waves: Joi.string().optional(),
   amount_issued: Joi.number().integer().required(), // Total tickets issued
   price: Joi.array()
     .items(
@@ -566,7 +567,6 @@ const createTicketsSchema = Joi.object({
       Joi.object({
         section: Joi.string().required(),
         seats: Joi.number().integer().required(),
-        color: Joi.string().required(), 
       })
     )
     .required(),
@@ -592,6 +592,37 @@ const cancelReservationSchema = Joi.object({
   ticket_sold_id: Joi.number().integer().required(),
 });
 
+const createNotificationSchema = Joi.object({
+  user_id: Joi.number().integer().optional().allow(null),
+  event_id: Joi.number().integer().optional().allow(null),
+  blog_id: Joi.number().integer().optional().allow(null),
+  product_id: Joi.number().integer().optional().allow(null),
+  notification_type: Joi.string()
+    .valid("organizer-approval", "event-approval", "blog-approval")
+    .optional()
+    .messages({
+      "any.required": "Notification type is required.",
+      "string.valid": "Invalid notification type.",
+    }),
+  alerts: Joi.string()
+    .valid(
+      "low-stock",
+      "low-tickets",
+      "report-event",
+      "report-blog",
+      "report-product"
+    )
+    .optional()
+    .messages({
+      "any.required": "Alert type is required.",
+      "string.valid": "Invalid alert type.",
+    }),
+  message: Joi.string().max(255).optional().messages({
+    "any.required": "Message is required.",
+    "string.max": "Message cannot exceed 255 characters.",
+  }),
+});
+
   module.exports = {
     AuthVAlSchema,
     LoginVAlSchema,
@@ -613,5 +644,6 @@ const cancelReservationSchema = Joi.object({
     createTicketsSchema,
     reserveTicketSchema,
     confirmPurchaseSchema,
-    cancelReservationSchema
+    cancelReservationSchema,
+    createNotificationSchema 
 };

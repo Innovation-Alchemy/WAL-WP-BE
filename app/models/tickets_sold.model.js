@@ -17,34 +17,31 @@ module.exports = (sequelize, Sequelize) => {
       type: Sequelize.STRING,
       allowNull: false,
     },
-    seat_number: {
-      type: Sequelize.JSON,
+    seat: {
+      type: Sequelize.INTEGER,
       allowNull: false,
     },
     color: {
       type: Sequelize.STRING,
       allowNull: false,
     },
-    amount: {
-      type: Sequelize.INTEGER,
+    price: {
+      type: Sequelize.DECIMAL(10, 2),
       allowNull: false,
     },
     status: {
-      type: Sequelize.ENUM("pending", "reserved", "purchased", "canceled"),
+      type: Sequelize.ENUM("pending","reserved", "sold","canceled"),
       defaultValue: "pending",
     },
-    total_price: {
-      type: Sequelize.DECIMAL(10, 2),
-      allowNull: false,
+    reserved_at: {
+      type: Sequelize.DATE,
+      defaultValue: Sequelize.NOW,
     },
     qr_code: {
       type: Sequelize.TEXT,
       allowNull: true,
     },
-    tickets_sold_count: {
-      type: Sequelize.INTEGER,
-      defaultValue: 0, // Default to 0
-    },
+   
   });
 
   return TicketsSold;

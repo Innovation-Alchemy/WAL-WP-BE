@@ -151,7 +151,7 @@ exports.updateProduct = async (req, res) => {
       }
     }
 
-    const { name, description, price, size, color, commission, is_approved } = req.body;
+    const { name, description, price, size, color, commission, is_approved,stock_alert } = req.body;
 
     // Validate price combinations
     if (size && color && price) {
@@ -196,6 +196,7 @@ exports.updateProduct = async (req, res) => {
       size: size !== undefined ? size : product.size,
       color: color !== undefined ? color : product.color,
       commission: commission !== undefined ? commission : product.commission,
+      stock_alert: stock_alert!==undefined?stock_alert:product.stock_alert,
       is_approved: approvalStatus,
       image, // Save updated images
     });

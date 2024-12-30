@@ -520,8 +520,23 @@ exports.requestOrganizerRole = async (req, res) => {
     // Send the email
     await transporter.sendMail(mailOptions);
 
+    // Add notification for admin
+    const adminUsers = await User.findAll({ where: { role: "Admin" } }); // Fetch all admins
+
+    if (adminUsers.length > 0) {
+      const notifications = adminUsers.map((admin) => ({
+        user_id: admin.id,
+        notification_type: "organizer-approval",
+        message: `${user.name} has requested to become an organizer. Message: ${message}`,
+        is_read: false,
+      }));
+
+      // Bulk create notifications for all admins
+      await db.notification.bulkCreate(notifications);
+    }
+
     res.status(200).json({
-      message: "Request to become an organizer has been sent to the admin.",
+      message: "Request to become an organizer has been sent to the admin, and a notification has been created.",
     });
   } catch (error) {
     console.error("Error sending organizer request email:", error);
@@ -531,3 +546,4 @@ exports.requestOrganizerRole = async (req, res) => {
     });
   }
 };
+

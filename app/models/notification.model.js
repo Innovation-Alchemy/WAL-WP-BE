@@ -7,12 +7,31 @@ module.exports = (sequelize, Sequelize) => {
         autoIncrement: true,
         primaryKey: true,
       },
-      notification_type:{  type: Sequelize.ENUM("notification", "alert"),
-        allowNull: false,
-        },
+      user_id: { type: Sequelize.INTEGER, allowNull: true },
+      event_id: { type: Sequelize.INTEGER, allowNull: true },
+      blog_id: { type: Sequelize.INTEGER, allowNull: true },
+      product_id: { type: Sequelize.INTEGER, allowNull: true },
+      notification_type: {
+        type: Sequelize.ENUM(
+          "organizer-approval",
+          "event-approval",
+          "blog-approval"
+        ),
+        allowNull: true,
+      },
+      alerts: {
+        type: Sequelize.ENUM(
+          "low-stock",
+          "low-tickets",
+          "report-event",
+          "report-blog",
+          "report-product"
+        ),
+        allowNull: true,
+      },
       message: {
-        type: Sequelize.STRING, // Notification text
-        allowNull: false,
+        type: Sequelize.STRING,
+        allowNull: true,
       },
       is_read: {
         type: Sequelize.BOOLEAN,

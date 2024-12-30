@@ -6,11 +6,12 @@ module.exports = (app) => {
   
 
     router.get("/tickets-sold",authenticate, ticketSoldController.getAllTicketsSold);
-    router.get("/total-tickets-sold-count/:buyer_id",authenticate, ticketSoldController.getTicketsSoldCount);
     router.get("/tickets-sold/:id",authenticate, ticketSoldController.getTicketsSoldById);
-    router.post("/tickets-sold/reserve",authenticate, ticketSoldController.reserveTicket);
-    router.post("/tickets-sold/confirm",authenticate, ticketSoldController.confirmPurchase);
-    router.post("/tickets-sold/cancel", authenticate,ticketSoldController.cancelReservation);
+    router.post("/tickets-sold/reserve",authenticate, ticketSoldController.reserveTickets);
+    router.post("/tickets-sold/confirm-purchasing-tickets",authenticate, ticketSoldController.confirmPurchases);
+   // router.post("/tickets-sold/scan-qr-code",authenticate, ticketSoldController.scanQRCode);
+ 
+    
   
     app.use("/api", router);
   };

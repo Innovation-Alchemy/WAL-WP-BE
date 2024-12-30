@@ -1,6 +1,7 @@
 const db = require("../models");
 const Event = db.Event;
 const Organizer = db.User;
+const Notification = db.notification;
 const { createEventSchema } = require("../utils/validations");
 
 // Get all events
@@ -46,6 +47,7 @@ exports.createEvent = async (req, res) => {
       ticket_maps,
       commission,
       is_approved,
+      ticket_alert
     } = req.body;
 
     // Check if the organizer exists
@@ -80,7 +82,7 @@ exports.createEvent = async (req, res) => {
     }
 
     // Determine is_approved value
-    const userRole = organizerExists.role; // Assuming organizerExists has the user's role
+    const userRole = organizerExists.role;
     const approvalStatus =
       userRole === "Admin"
         ? true // Admin-created events are automatically approved
@@ -100,7 +102,22 @@ exports.createEvent = async (req, res) => {
       ticket_maps: ticketMapPath,
       commission: eventCommission,
       is_approved: approvalStatus,
+      ticket_alert
     });
+
+    // If the organizer is not an admin, send a notification to admins
+    if (userRole !== "Admin") {
+      const adminUsers = await Organizer.findAll({ where: { role: "Admin" } });
+      const notifications = adminUsers.map((admin) => ({
+        user_id: admin.id,
+        notification_type: "event-approval",
+        message: `${organizerExists.name} has created an event titled "${title}" and requests approval.`,
+        event_id: event.id,
+        is_read: false,
+      }));
+
+      await Notification.bulkCreate(notifications);
+    }
 
     res.status(201).json({ message: "Event created successfully", data: event });
   } catch (error) {
@@ -111,7 +128,6 @@ exports.createEvent = async (req, res) => {
     });
   }
 };
-
 // Update an event
 exports.updateEvent = async (req, res) => {
   try {

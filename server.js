@@ -52,7 +52,7 @@ require("./app/routes/comments.routes")(app);
 require("./app/routes/views.routes")(app);
 require("./app/routes/product.routes")(app);
 require("./app/routes/product_purchase.routes")(app);
-//require("./app/routes/notification.routes")(app);
+require("./app/routes/notification.routes")(app);
 
 // Start server
 const PORT = process.env.PORT || 8080;

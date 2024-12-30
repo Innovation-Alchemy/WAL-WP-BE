@@ -9,6 +9,10 @@ module.exports = (sequelize, Sequelize) => {
       type: Sequelize.INTEGER,
       allowNull: false,
     },
+    waves: {
+      type: Sequelize.STRING,
+      allowNull: true,
+    },
     amount_issued: {
       type: Sequelize.INTEGER,
       allowNull: false,
@@ -28,6 +32,10 @@ module.exports = (sequelize, Sequelize) => {
     total_seats: {
       type: Sequelize.JSON, // Array of {section, seats}
       allowNull: false,
+    },
+    tickets_sold_count: {
+      type: Sequelize.INTEGER,
+      defaultValue: 0, // Default to 0
     },
   });
 

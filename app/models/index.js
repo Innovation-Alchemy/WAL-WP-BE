@@ -63,6 +63,22 @@ db.Coupon.belongsTo(db.Product, { foreignKey: "product_id" });
 db.User.hasMany(db.Coupon, { foreignKey: "user_id", onDelete: "CASCADE" });
 db.Coupon.belongsTo(db.User, { foreignKey: "user_id" });
 
+// User - Notification association (User has many notifications)
+db.User.hasMany(db.notification, { foreignKey: "user_id", onDelete: "CASCADE" });
+db.notification.belongsTo(db.User, { foreignKey: "user_id" });
+
+// Blog - Notification association (Blog has many notifications)
+db.Blog.hasMany(db.notification, { foreignKey: "blog_id", onDelete: "CASCADE" });
+db.notification.belongsTo(db.Blog, { foreignKey: "blog_id" });
+
+// Product - Notification association (Product has many notifications)
+db.Product.hasMany(db.notification, { foreignKey: "product_id", onDelete: "CASCADE" });
+db.notification.belongsTo(db.Product, { foreignKey: "product_id" });
+
+// Event - Notification association (Event has many notifications)
+db.Event.hasMany(db.notification, { foreignKey: "event_id", onDelete: "CASCADE" });
+db.notification.belongsTo(db.Event, { foreignKey: "event_id" });
+
 // Product and ProductPurchase (one-to-many)
 db.Product.hasMany(db.ProductPurchase, { foreignKey: "product_id", onDelete: "CASCADE" });
 db.ProductPurchase.belongsTo(db.Product, { foreignKey: "product_id" });

@@ -2,7 +2,7 @@ const db = require("../models");
 const Blog = db.Blog;
 const User= db.User;
 const {createBlogSchema}= require('../utils/validations');
-
+const Notification = db.notification;
 /**
  * Retrieve all blogs
  */
@@ -42,13 +42,13 @@ exports.createBlog = async (req, res) => {
   }
 
   try {
-    const { user_id, event_id, title, content, tags, description,is_approved, } = req.body;
-    
- // Check if the organizer exists
- const userExists = await User.findByPk(user_id);
- if (!userExists) {
-   return res.status(404).json({ message: "Organizer not found" });
- }
+    const { user_id, event_id, title, content, tags, description, is_approved } = req.body;
+
+    // Check if the user exists
+    const user = await User.findByPk(user_id);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
 
     // Handle uploaded files
     let files = [];
@@ -60,12 +60,8 @@ exports.createBlog = async (req, res) => {
       );
     }
 
-     // Determine is_approved value
-     const userRole = userExists.role; // Assuming userExists has the user's role
-     const approvalStatus =
-       userRole === "Admin"
-         ? true // Admin-created events are automatically approved
-         : is_approved || false; // Use provided value if available; default to false
+    // Determine approval status
+    const approvalStatus = user.role === "Admin" ? true : is_approved || false;
 
     // Create the blog in the database
     const blog = await Blog.create({
@@ -73,11 +69,25 @@ exports.createBlog = async (req, res) => {
       event_id,
       title,
       content,
-      tags: tags ? JSON.parse(tags) : [], // Parse tags if sent as a JSON string
-      files, // Save file URLs
+      tags: tags ? JSON.parse(tags) : [],
+      files,
       description,
       is_approved: approvalStatus,
     });
+
+    // If the user is not an admin, send a notification to admins
+    if (user.role !== "Admin") {
+      const adminUsers = await User.findAll({ where: { role: "Admin" } });
+      const notifications = adminUsers.map((admin) => ({
+        user_id: admin.id,
+        notification_type: "blog-approval",
+        message: `${user.name} has created a blog titled "${title}" and requests approval.`,
+        blog_id: blog.id,
+        is_read: false,
+      }));
+
+      await Notification.bulkCreate(notifications);
+    }
 
     res.status(201).json({ message: "Blog created successfully", data: blog });
   } catch (error) {
@@ -85,7 +95,6 @@ exports.createBlog = async (req, res) => {
     res.status(500).json({ message: "Error creating blog", error: error.message });
   }
 };
-
 /**
  * Update a blog by ID
  */
