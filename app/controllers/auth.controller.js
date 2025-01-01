@@ -51,27 +51,41 @@ exports.register = async (req, res) => {
     newUser.token = token;
     newUser.TokenExpires = TokenExpires;
     await newUser.save();
-
     const verificationLink = `${process.env.BACKEND_URL}/api/auth/verify-email/${token}`;
     const mailOptions = {
       from: process.env.EMAIL_USER,
       to: email,
-      subject: "Verify Your Email",
+      subject: "Verify Your Email - We Are Lebanon",
       html: `
-        <h3>Welcome to We Are Lebanon App, ${name}</h3>
-        <p>Please verify your email by clicking the button below:</p>
-       <a href="${verificationLink}?token=${token}" 
-          style="
-            padding: 10px 20px;
-            background-color: #007bff;
-            color: #ffffff;
-            text-decoration: none;
-            border-radius: 5px;
-            font-size: 16px; ">
-             Verify Email
-        </a>
-        <p>If the button above doesn't work, copy and paste the following link into your browser:</p>
-        <p>${verificationLink}?token=${token}</p>
+        <div style="background-color: #150D0D; font-family: Arial, sans-serif; color: #FFFFFF; padding: 20px;">
+          <div style="text-align: center; margin-bottom: 20px;">
+            <img src="https://wearelebanon.guide/WALLogo.png" alt="We Are Lebanon Logo" width="363" height="184" style="max-width: 100%; height: auto;" />
+          </div>
+          <div style="background: radial-gradient(circle, #926060 0%, #843434 100%); border-radius: 10px; padding: 20px; max-width: 600px; margin: 0 auto; text-align: center;">
+            <h2 style="margin-bottom: 20px;">Welcome to We Are Lebanon, ${name}!</h2>
+            <p style="margin-bottom: 20px;">Please verify your email to get started with our platform.</p>
+            <a href="${verificationLink}?token=${token}" 
+              style="
+                display: inline-block;
+                padding: 10px 20px;
+                background-color: #F9A8AE;
+                color: #7B2128;
+                text-decoration: none;
+                border-radius: 5px;
+                font-size: 16px;
+                font-weight: bold;
+                margin-bottom: 20px;">
+              Verify Email
+            </a>
+            <p>If the button above doesn't work, copy and paste the following link into your browser:</p>
+            <p style="word-wrap: break-word; color: #ffffff;">
+              <a href="${verificationLink}?token=${token}" style="color: #F9A8AE; text-decoration: underline;">Click Here to Verify Your Email</a>
+            </p>
+          </div>
+          <div style="margin-top: 20px; text-align: center; font-size: 12px; color: #AAAAAA;">
+            <p>We Are Lebanon, All rights reserved.</p>
+          </div>
+        </div>
       `,
     };
 
