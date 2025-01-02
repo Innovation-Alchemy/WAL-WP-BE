@@ -37,6 +37,10 @@ module.exports = (sequelize, Sequelize) => {
       type: Sequelize.INTEGER,
       defaultValue: 0, // Default to 0
     },
+    tickets_sold_count_sum_price: {
+      type: Sequelize.DECIMAL(10, 2),
+      allowNull: true,
+    },
   });
 
   return Tickets;

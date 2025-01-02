@@ -16,7 +16,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"name\":\"Fadel hmd7\",\r\n  \"email\": \"fadelhammoud@innoalchemy.com\",\r\n  \"password\":\"inno@fadel777\",\r\n  \"gender\": \"male\",\r\n  \"birthdate\": \"1996-01-20\",\r\n  \"role\": \"User\",\r\n  \"phone_number\":\"714916136666\"\r\n}",
+							"raw": "{\r\n  \"name\":\"Fadel hmd7\",\r\n  \"email\": \"irada@innoalchemy.business\",\r\n  \"password\":\"inno@fadel777\",\r\n  \"gender\": \"male\",\r\n  \"birthdate\": \"1996-01-20\",\r\n  \"role\": \"Admin\",\r\n  \"phone_number\":\"716969256\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -34,6 +34,47 @@
 								"api",
 								"auth",
 								"register"
+							]
+						},
+						"description": "This endpoint allows new users to create an account by providing their details. Upon successful registration, the user will receive an email verification link to activate their account before logging in."
+					},
+					"response": []
+				},
+				{
+					"name": "Request to be organizer",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6IkFkbWluIiwiaWF0IjoxNzM1MzA0MTIzLCJleHAiOjE3MzU5MDg5MjN9.2tb_ESvj0oPT3XRTsfNt7CQrAr0SROo3aQ799E2jICY",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"user_id\":1,\r\n  \"message\": \"im want to be an organizer\"\r\n  \r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/auth/request-organizer",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"auth",
+								"request-organizer"
 							]
 						},
 						"description": "This endpoint allows new users to create an account by providing their details. Upon successful registration, the user will receive an email verification link to activate their account before logging in."
@@ -70,7 +111,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"email\": \"irada@innoalchemy.business\",\r\n  \"password\": \"fadel789789\"\r\n}",
+							"raw": "{\r\n  \"email\": \"fadel.ahammoud@gmail.com\",\r\n  \"password\": \"inno@fadel777\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -170,7 +211,7 @@
 							"bearer": [
 								{
 									"key": "token",
-									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6IlVzZXIiLCJpYXQiOjE3MzQ2OTkxODUsImV4cCI6MTczNTMwMzk4NX0.Z7_lqhRGdK6fwCX5dlYKLMLLjjUfxGUZL2HfZRApr74",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6IkFkbWluIiwiaWF0IjoxNzM1MzA0MTIzLCJleHAiOjE3MzU5MDg5MjN9.2tb_ESvj0oPT3XRTsfNt7CQrAr0SROo3aQ799E2jICY",
 									"type": "string"
 								}
 							]
@@ -187,6 +228,37 @@
 							"path": [
 								"api",
 								"users"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Users That Needs Approval",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6IkFkbWluIiwiaWF0IjoxNzM1MzA0MTIzLCJleHAiOjE3MzU5MDg5MjN9.2tb_ESvj0oPT3XRTsfNt7CQrAr0SROo3aQ799E2jICY",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/users/approval-needed",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"users",
+								"approval-needed"
 							]
 						}
 					},
@@ -231,7 +303,7 @@
 							"bearer": [
 								{
 									"key": "token",
-									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6IlVzZXIiLCJpYXQiOjE3MzQ2OTkxODUsImV4cCI6MTczNTMwMzk4NX0.Z7_lqhRGdK6fwCX5dlYKLMLLjjUfxGUZL2HfZRApr74",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6IkFkbWluIiwiaWF0IjoxNzM1MzA0MTIzLCJleHAiOjE3MzU5MDg5MjN9.2tb_ESvj0oPT3XRTsfNt7CQrAr0SROo3aQ799E2jICY",
 									"type": "string"
 								}
 							]
@@ -246,7 +318,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"name\":\"Fadelhmd\",\r\n  \"email\": \"irada@innoalchemy.business\",\r\n  \"gender\": \"male\",\r\n  \"birthdate\": \"1996-01-20\",\r\n  \"role\": \"User\",\r\n  \"phone_number\":\"71491613\"\r\n}"
+							"raw": "{\r\n  \"name\":\"Abbas\",\r\n  \"email\": \"irada@innoalchemy.business\",\r\n  \"gender\": \"male\",\r\n  \"birthdate\": \"1997-01-11\",\r\n  \"role\": \"User\",\r\n  \"phone_number\":\"71080906\"\r\n}\r\n"
 						},
 						"url": {
 							"raw": "http://localhost:8080/api/users",
@@ -265,6 +337,48 @@
 					"response": []
 				},
 				{
+					"name": "create an operator",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6IkFkbWluIiwiaWF0IjoxNzM1MzA0MTIzLCJleHAiOjE3MzU5MDg5MjN9.2tb_ESvj0oPT3XRTsfNt7CQrAr0SROo3aQ799E2jICY",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"name\": \"John Doe\",\r\n  \"email\": \"irada@innoalchemy.business\",\r\n  \"phone_number\": \"1234567890\",\r\n  \"gender\": \"Male\",\r\n  \"birthdate\": \"1990-01-01\"\r\n  \r\n}\r\n"
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/users/operator",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"users",
+								"operator"
+							]
+						},
+						"description": "This endpoint allows new users to create an account by providing their details. Upon successful registration, the user will receive an email verification link to activate their account before logging in."
+					},
+					"response": []
+				},
+				{
 					"name": "Update User",
 					"request": {
 						"auth": {
@@ -272,7 +386,7 @@
 							"bearer": [
 								{
 									"key": "token",
-									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6IlVzZXIiLCJpYXQiOjE3MzQ2OTkxODUsImV4cCI6MTczNTMwMzk4NX0.Z7_lqhRGdK6fwCX5dlYKLMLLjjUfxGUZL2HfZRApr74",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6IkFkbWluIiwiaWF0IjoxNzM1MzA0MTIzLCJleHAiOjE3MzU5MDg5MjN9.2tb_ESvj0oPT3XRTsfNt7CQrAr0SROo3aQ799E2jICY",
 									"type": "string"
 								}
 							]
@@ -326,14 +440,14 @@
 								},
 								{
 									"key": "role",
-									"value": "",
-									"type": "text",
-									"disabled": true
+									"value": "Organizer",
+									"type": "text"
 								},
 								{
 									"key": "profile_picture",
 									"type": "file",
-									"src": "/C:/Users/USER/Pictures/hk.jpg"
+									"src": "/C:/Users/USER/Pictures/hk.jpg",
+									"disabled": true
 								},
 								{
 									"key": "phone_number",
@@ -344,7 +458,7 @@
 							]
 						},
 						"url": {
-							"raw": "http://localhost:8080/api/users/1",
+							"raw": "http://localhost:8080/api/users/18",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -353,7 +467,7 @@
 							"path": [
 								"api",
 								"users",
-								"1"
+								"18"
 							]
 						}
 					},
@@ -375,7 +489,7 @@
 						"method": "DELETE",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:8080/api/users/7",
+							"raw": "http://localhost:8080/api/users/21",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -384,7 +498,7 @@
 							"path": [
 								"api",
 								"users",
-								"7"
+								"21"
 							]
 						}
 					},
@@ -730,7 +844,7 @@
 							"bearer": [
 								{
 									"key": "token",
-									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6IlVzZXIiLCJpYXQiOjE3MzQ2OTkxODUsImV4cCI6MTczNTMwMzk4NX0.Z7_lqhRGdK6fwCX5dlYKLMLLjjUfxGUZL2HfZRApr74",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6IkFkbWluIiwiaWF0IjoxNzM1MzA0MTIzLCJleHAiOjE3MzU5MDg5MjN9.2tb_ESvj0oPT3XRTsfNt7CQrAr0SROo3aQ799E2jICY",
 									"type": "string"
 								}
 							]
@@ -822,7 +936,7 @@
 							"bearer": [
 								{
 									"key": "token",
-									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6IlVzZXIiLCJpYXQiOjE3MzQ2OTkxODUsImV4cCI6MTczNTMwMzk4NX0.Z7_lqhRGdK6fwCX5dlYKLMLLjjUfxGUZL2HfZRApr74",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6IkFkbWluIiwiaWF0IjoxNzM1MzA0MTIzLCJleHAiOjE3MzU5MDg5MjN9.2tb_ESvj0oPT3XRTsfNt7CQrAr0SROo3aQ799E2jICY",
 									"type": "string"
 								}
 							]
@@ -837,7 +951,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"name\": \"delete-event\"\n}\n",
+							"raw": "{\n  \"name\": \"create-operator\"\n}\n",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -883,7 +997,7 @@
 							"bearer": [
 								{
 									"key": "token",
-									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6IlVzZXIiLCJpYXQiOjE3MzQ2OTkxODUsImV4cCI6MTczNTMwMzk4NX0.Z7_lqhRGdK6fwCX5dlYKLMLLjjUfxGUZL2HfZRApr74",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6IkFkbWluIiwiaWF0IjoxNzM1MzA0MTIzLCJleHAiOjE3MzU5MDg5MjN9.2tb_ESvj0oPT3XRTsfNt7CQrAr0SROo3aQ799E2jICY",
 									"type": "string"
 								}
 							]
@@ -898,7 +1012,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"permissionIds\": [20,21,22]\n\n}\n",
+							"raw": "{\n  \"permissionIds\": [45]\n\n}\n",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -946,7 +1060,7 @@
 							"bearer": [
 								{
 									"key": "token",
-									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6IlVzZXIiLCJpYXQiOjE3MzQ2OTkxODUsImV4cCI6MTczNTMwMzk4NX0.Z7_lqhRGdK6fwCX5dlYKLMLLjjUfxGUZL2HfZRApr74",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6IkFkbWluIiwiaWF0IjoxNzM1MzA0MTIzLCJleHAiOjE3MzU5MDg5MjN9.2tb_ESvj0oPT3XRTsfNt7CQrAr0SROo3aQ799E2jICY",
 									"type": "string"
 								}
 							]
@@ -961,7 +1075,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"permissionIds\":[6]\n}\n",
+							"raw": "{\n  \"permissionIds\":[43]\n}\n",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1009,7 +1123,7 @@
 							"bearer": [
 								{
 									"key": "token",
-									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6IlVzZXIiLCJpYXQiOjE3MzQ2OTkxODUsImV4cCI6MTczNTMwMzk4NX0.Z7_lqhRGdK6fwCX5dlYKLMLLjjUfxGUZL2HfZRApr74",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6IkFkbWluIiwiaWF0IjoxNzM1MzA0MTIzLCJleHAiOjE3MzU5MDg5MjN9.2tb_ESvj0oPT3XRTsfNt7CQrAr0SROo3aQ799E2jICY",
 									"type": "string"
 								}
 							]
@@ -1024,7 +1138,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"name\": \"update-product\"\n}\n",
+							"raw": "{\n  \"name\": \"create-blogs\"\n}\n",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1032,7 +1146,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:8080/api/permissions/18",
+							"raw": "http://localhost:8080/api/permissions/43",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -1041,7 +1155,7 @@
 							"path": [
 								"api",
 								"permissions",
-								"18"
+								"43"
 							]
 						},
 						"description": "This is a PUT request and it is used to overwrite an existing piece of data. For instance, after you create an entity with a POST request, you may want to modify that later. You can do that using a PUT request. You typically identify the entity being updated by including an identifier in the URL (eg. `id=1`).\n\nA successful PUT request typically returns a `200 OK`, `201 Created`, or `204 No Content` response code."
@@ -1701,6 +1815,934 @@
 			]
 		},
 		{
+			"name": "Notification Management",
+			"item": [
+				{
+					"name": "Gell All Notifications",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6IkFkbWluIiwiaWF0IjoxNzM1MzA0MTIzLCJleHAiOjE3MzU5MDg5MjN9.2tb_ESvj0oPT3XRTsfNt7CQrAr0SROo3aQ799E2jICY",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/notifications",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"notifications"
+							]
+						},
+						"description": "This endpoint allows selecting all types like blog, product, and event to facilitate adding a category."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Notification By Id",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6IkFkbWluIiwiaWF0IjoxNzM1MzA0MTIzLCJleHAiOjE3MzU5MDg5MjN9.2tb_ESvj0oPT3XRTsfNt7CQrAr0SROo3aQ799E2jICY",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/notifications/3",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"notifications",
+								"3"
+							]
+						},
+						"description": "This endpoint allows the selection of a category by its id."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Notification By User Id",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6IkFkbWluIiwiaWF0IjoxNzM1MzA0MTIzLCJleHAiOjE3MzU5MDg5MjN9.2tb_ESvj0oPT3XRTsfNt7CQrAr0SROo3aQ799E2jICY",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/notifications/user/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"notifications",
+								"user",
+								"1"
+							]
+						},
+						"description": "This endpoint allows the selection of a category by its id."
+					},
+					"response": []
+				},
+				{
+					"name": "create Notification",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6IkFkbWluIiwiaWF0IjoxNzM1MzA0MTIzLCJleHAiOjE3MzU5MDg5MjN9.2tb_ESvj0oPT3XRTsfNt7CQrAr0SROo3aQ799E2jICY",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"user_id\": 1,\r\n  //\"event_id\": 2,\r\n // \"blog_id\": null,\r\n  \"product_id\": 1,\r\n  //\"notification_type\": \"organizer-approval\",\r\n  \"alerts\": \"low-stock\",\r\n  \"message\": \"Low stock for Product A.\"\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/notifications",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"notifications"
+							]
+						},
+						"description": "This endpoint allows adding a new category."
+					},
+					"response": []
+				},
+				{
+					"name": "mark as read",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6IkFkbWluIiwiaWF0IjoxNzM1MzA0MTIzLCJleHAiOjE3MzU5MDg5MjN9.2tb_ESvj0oPT3XRTsfNt7CQrAr0SROo3aQ799E2jICY",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/notifications/read/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"notifications",
+								"read",
+								"1"
+							]
+						},
+						"description": "This endpoint allows updating a category."
+					},
+					"response": []
+				},
+				{
+					"name": "delete",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6IkFkbWluIiwiaWF0IjoxNzM1MzA0MTIzLCJleHAiOjE3MzU5MDg5MjN9.2tb_ESvj0oPT3XRTsfNt7CQrAr0SROo3aQ799E2jICY",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3000/api/notifications/{id}",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"notifications",
+								"{id}"
+							]
+						},
+						"description": "This endpoint allows deleting a category."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Event Management",
+			"item": [
+				{
+					"name": "Get All Events",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6IkFkbWluIiwiaWF0IjoxNzM1MzA0MTIzLCJleHAiOjE3MzU5MDg5MjN9.2tb_ESvj0oPT3XRTsfNt7CQrAr0SROo3aQ799E2jICY",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/events",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"events"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Event by id",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6IlVzZXIiLCJpYXQiOjE3MzQ2OTkxODUsImV4cCI6MTczNTMwMzk4NX0.Z7_lqhRGdK6fwCX5dlYKLMLLjjUfxGUZL2HfZRApr74",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/events/3",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"events",
+								"3"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create event",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6IkFkbWluIiwiaWF0IjoxNzM1MzA0MTIzLCJleHAiOjE3MzU5MDg5MjN9.2tb_ESvj0oPT3XRTsfNt7CQrAr0SROo3aQ799E2jICY",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "multipart/form-data",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "organizer_id",
+									"value": "18",
+									"type": "text"
+								},
+								{
+									"key": "title",
+									"value": "Annual Conference3266",
+									"type": "text"
+								},
+								{
+									"key": "description",
+									"value": "A premier conference2",
+									"type": "text"
+								},
+								{
+									"key": "date_time[0]",
+									"value": "2024-05-11T11:00:00Z",
+									"type": "text"
+								},
+								{
+									"key": "date_time[1]",
+									"value": "2024-05-05T17:00:00Z",
+									"type": "text"
+								},
+								{
+									"key": "location[lat]",
+									"value": "30.712776",
+									"type": "text"
+								},
+								{
+									"key": "location[lng]",
+									"value": "-74.005974",
+									"type": "text"
+								},
+								{
+									"key": "location[address]",
+									"value": "lebanon-sour",
+									"type": "text"
+								},
+								{
+									"key": "seated",
+									"value": "true",
+									"type": "text"
+								},
+								{
+									"key": "ticket_maps",
+									"type": "file",
+									"src": "/C:/Users/USER/Pictures/cr7.jpg"
+								},
+								{
+									"key": "commission",
+									"value": "4",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "ticket_alert",
+									"value": "20",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/events",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"events"
+							]
+						},
+						"description": "This endpoint allows new users to create an account by providing their details. Upon successful registration, the user will receive an email verification link to activate their account before logging in."
+					},
+					"response": []
+				},
+				{
+					"name": "Update Event",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6IlVzZXIiLCJpYXQiOjE3MzQ2OTkxODUsImV4cCI6MTczNTMwMzk4NX0.Z7_lqhRGdK6fwCX5dlYKLMLLjjUfxGUZL2HfZRApr74",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "multipart/form-data",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "title",
+									"value": "Annual Conference",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "description",
+									"value": "A premier conference",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "date_time[0]",
+									"value": "2024-05-01T15:00:00Z",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "date_time[1]",
+									"value": "2024-05-02T27:00:00Z",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "location[lat]",
+									"value": "40.712776",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "location[lng]",
+									"value": "-74.005974",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "seated",
+									"value": "false",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "ticket_maps",
+									"value": "https://www.anaconda.com/",
+									"type": "text"
+								},
+								{
+									"key": "organizer_id",
+									"value": "18",
+									"type": "text",
+									"disabled": true
+								}
+							]
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/events/2",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"events",
+								"2"
+							]
+						},
+						"description": "This endpoint allows new users to create an account by providing their details. Upon successful registration, the user will receive an email verification link to activate their account before logging in."
+					},
+					"response": []
+				},
+				{
+					"name": "Delete event",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6IlVzZXIiLCJpYXQiOjE3MzQ2OTkxODUsImV4cCI6MTczNTMwMzk4NX0.Z7_lqhRGdK6fwCX5dlYKLMLLjjUfxGUZL2HfZRApr74",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/events/3",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"events",
+								"3"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Tickets Management",
+			"item": [
+				{
+					"name": "Get All Tickets",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6IkFkbWluIiwiaWF0IjoxNzM1MzA0MTIzLCJleHAiOjE3MzU5MDg5MjN9.2tb_ESvj0oPT3XRTsfNt7CQrAr0SROo3aQ799E2jICY",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/tickets",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"tickets"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Tickets By Ticket Id",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6IlVzZXIiLCJpYXQiOjE3MzQ2OTkxODUsImV4cCI6MTczNTMwMzk4NX0.Z7_lqhRGdK6fwCX5dlYKLMLLjjUfxGUZL2HfZRApr74",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/tickets/2",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"tickets",
+								"2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get ticket by Event id",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6IlVzZXIiLCJpYXQiOjE3MzQ2OTkxODUsImV4cCI6MTczNTMwMzk4NX0.Z7_lqhRGdK6fwCX5dlYKLMLLjjUfxGUZL2HfZRApr74",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/tickets/event/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"tickets",
+								"event",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create ticket",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6IkFkbWluIiwiaWF0IjoxNzM1MzA0MTIzLCJleHAiOjE3MzU5MDg5MjN9.2tb_ESvj0oPT3XRTsfNt7CQrAr0SROo3aQ799E2jICY",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"event_id\": 1,\r\n  \"amount_issued\": 300,\r\n  \"waves\":\"wave-1\",\r\n  \"price\": [\r\n    { \"color\": \"blue\", \"price\": 110 },\r\n    { \"color\": \"red\", \"price\": 70 }\r\n  ],\r\n  \"section\": [\r\n    { \"color\": \"blue\", \"section\": [\"A\", \"B\"] },\r\n    { \"color\": \"red\", \"section\": [\"B\"] }\r\n  ],\r\n  \"total_seats\": [\r\n    { \"section\": \"A\", \"seats\": 100  },\r\n    { \"section\": \"B\", \"seats\": 120 },\r\n    { \"section\": \"B\", \"seats\": 80 }\r\n  ]\r\n}\r\n"
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/tickets",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"tickets"
+							]
+						},
+						"description": "This endpoint allows new users to create an account by providing their details. Upon successful registration, the user will receive an email verification link to activate their account before logging in."
+					},
+					"response": []
+				},
+				{
+					"name": "Update ticket",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6IkFkbWluIiwiaWF0IjoxNzM1MzA0MTIzLCJleHAiOjE3MzU5MDg5MjN9.2tb_ESvj0oPT3XRTsfNt7CQrAr0SROo3aQ799E2jICY",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  //\"event_id\": 1,\r\n    \"amount_issued\": 8,\r\n  \"price\": [\r\n    { \"color\": \"blue\", \"price\": 130 },\r\n    { \"color\": \"red\", \"price\": 70 }\r\n  ],\r\n  \"section\": [\r\n    { \"color\": \"blue\", \"section\": [\"A\", \"B\"] },\r\n    { \"color\": \"red\", \"section\": [\"B\"] }\r\n  ],\r\n  \"total_seats\": [\r\n    { \"section\": \"A\", \"seats\": 4 },\r\n    { \"section\": \"B\", \"seats\": 4 }\r\n  ]\r\n}\r\n"
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/tickets/2",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"tickets",
+								"2"
+							]
+						},
+						"description": "This endpoint allows new users to create an account by providing their details. Upon successful registration, the user will receive an email verification link to activate their account before logging in."
+					},
+					"response": []
+				},
+				{
+					"name": "Delete ticket",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6IkFkbWluIiwiaWF0IjoxNzM1MzA0MTIzLCJleHAiOjE3MzU5MDg5MjN9.2tb_ESvj0oPT3XRTsfNt7CQrAr0SROo3aQ799E2jICY",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/tickets/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"tickets",
+								"1"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Tickets Sold Management",
+			"item": [
+				{
+					"name": "Get All Tickets Sold",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6IkFkbWluIiwiaWF0IjoxNzM1MzA0MTIzLCJleHAiOjE3MzU5MDg5MjN9.2tb_ESvj0oPT3XRTsfNt7CQrAr0SROo3aQ799E2jICY",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/tickets-sold",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"tickets-sold"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Ticket sold by Id",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6IkFkbWluIiwiaWF0IjoxNzM1MzA0MTIzLCJleHAiOjE3MzU5MDg5MjN9.2tb_ESvj0oPT3XRTsfNt7CQrAr0SROo3aQ799E2jICY",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/tickets-sold/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"tickets-sold",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Reserve a ticket",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6IkFkbWluIiwiaWF0IjoxNzM1MzA0MTIzLCJleHAiOjE3MzU5MDg5MjN9.2tb_ESvj0oPT3XRTsfNt7CQrAr0SROo3aQ799E2jICY",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"ticket_id\": 2,\r\n  \"buyer_id\": 1,\r\n  \"reservations\": [\r\n    { \"section\": \"A\", \"seat\": \"1\", \"color\": \"blue\" },\r\n    { \"section\": \"B\", \"seat\": \"1\", \"color\": \"red\" },\r\n    { \"section\": \"A\", \"seat\": \"2\", \"color\": \"blue\" },\r\n    { \"section\": \"B\", \"seat\": \"2\", \"color\": \"red\" },\r\n    { \"section\": \"A\", \"seat\": \"3\", \"color\": \"blue\" },\r\n    { \"section\": \"B\", \"seat\": \"3\", \"color\": \"red\" },\r\n    { \"section\": \"A\", \"seat\": \"4\", \"color\": \"blue\" },\r\n    { \"section\": \"B\", \"seat\": \"4\", \"color\": \"red\" }\r\n  ]\r\n}\r\n"
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/tickets-sold/reserve",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"tickets-sold",
+								"reserve"
+							]
+						},
+						"description": "This endpoint allows new users to create an account by providing their details. Upon successful registration, the user will receive an email verification link to activate their account before logging in."
+					},
+					"response": []
+				},
+				{
+					"name": "Confirm Selling a ticket",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6IkFkbWluIiwiaWF0IjoxNzM1MzA0MTIzLCJleHAiOjE3MzU5MDg5MjN9.2tb_ESvj0oPT3XRTsfNt7CQrAr0SROo3aQ799E2jICY",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"ticket_sold_ids\": [4,5],\r\n  \"buyer_id\": 1\r\n}\r\n"
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/tickets-sold/confirm-purchasing-tickets",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"tickets-sold",
+								"confirm-purchasing-tickets"
+							]
+						},
+						"description": "This endpoint allows new users to create an account by providing their details. Upon successful registration, the user will receive an email verification link to activate their account before logging in."
+					},
+					"response": []
+				},
+				{
+					"name": "Cancel a ticket reservation",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6IkFkbWluIiwiaWF0IjoxNzM1MzA0MTIzLCJleHAiOjE3MzU5MDg5MjN9.2tb_ESvj0oPT3XRTsfNt7CQrAr0SROo3aQ799E2jICY",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"ticket_sold_id\": 1\r\n\r\n}\r\n"
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/tickets-sold/cancel-reservation/3",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"tickets-sold",
+								"cancel-reservation",
+								"3"
+							]
+						},
+						"description": "This endpoint allows new users to create an account by providing their details. Upon successful registration, the user will receive an email verification link to activate their account before logging in."
+					},
+					"response": []
+				}
+			]
+		},
+		{
 			"name": "Coupon Management",
 			"item": [
 				{
@@ -1996,7 +3038,7 @@
 							"bearer": [
 								{
 									"key": "token",
-									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6IlVzZXIiLCJpYXQiOjE3MzQ2OTkxODUsImV4cCI6MTczNTMwMzk4NX0.Z7_lqhRGdK6fwCX5dlYKLMLLjjUfxGUZL2HfZRApr74",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6IkFkbWluIiwiaWF0IjoxNzM1MzA0MTIzLCJleHAiOjE3MzU5MDg5MjN9.2tb_ESvj0oPT3XRTsfNt7CQrAr0SROo3aQ799E2jICY",
 									"type": "string"
 								}
 							]
@@ -2014,14 +3056,13 @@
 							"formdata": [
 								{
 									"key": "user_id",
-									"value": "16",
+									"value": "18",
 									"type": "text"
 								},
 								{
 									"key": "event_id",
-									"value": "2",
-									"type": "text",
-									"disabled": true
+									"value": "1",
+									"type": "text"
 								},
 								{
 									"key": "title",
@@ -2037,8 +3078,7 @@
 								{
 									"key": "tags",
 									"value": "[\"loli\", \"pop\",\"oko\"]",
-									"type": "text",
-									"disabled": true
+									"type": "text"
 								},
 								{
 									"key": "description",
@@ -2187,7 +3227,7 @@
 							"bearer": [
 								{
 									"key": "token",
-									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6IlVzZXIiLCJpYXQiOjE3MzQ2OTkxODUsImV4cCI6MTczNTMwMzk4NX0.Z7_lqhRGdK6fwCX5dlYKLMLLjjUfxGUZL2HfZRApr74",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6IkFkbWluIiwiaWF0IjoxNzM1MzA0MTIzLCJleHAiOjE3MzU5MDg5MjN9.2tb_ESvj0oPT3XRTsfNt7CQrAr0SROo3aQ799E2jICY",
 									"type": "string"
 								}
 							]
@@ -2218,7 +3258,7 @@
 							"bearer": [
 								{
 									"key": "token",
-									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6IlVzZXIiLCJpYXQiOjE3MzQ2OTkxODUsImV4cCI6MTczNTMwMzk4NX0.Z7_lqhRGdK6fwCX5dlYKLMLLjjUfxGUZL2HfZRApr74",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6IkFkbWluIiwiaWF0IjoxNzM1MzA0MTIzLCJleHAiOjE3MzU5MDg5MjN9.2tb_ESvj0oPT3XRTsfNt7CQrAr0SROo3aQ799E2jICY",
 									"type": "string"
 								}
 							]
@@ -2226,7 +3266,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:8080/api/products/2",
+							"raw": "http://localhost:8080/api/products/1",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -2235,7 +3275,7 @@
 							"path": [
 								"api",
 								"products",
-								"2"
+								"1"
 							]
 						},
 						"description": "This endpoint allows selection one blog by passing the id as a parameter."
@@ -2250,7 +3290,7 @@
 							"bearer": [
 								{
 									"key": "token",
-									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6IlVzZXIiLCJpYXQiOjE3MzQ2OTkxODUsImV4cCI6MTczNTMwMzk4NX0.Z7_lqhRGdK6fwCX5dlYKLMLLjjUfxGUZL2HfZRApr74",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6IkFkbWluIiwiaWF0IjoxNzM1MzA0MTIzLCJleHAiOjE3MzU5MDg5MjN9.2tb_ESvj0oPT3XRTsfNt7CQrAr0SROo3aQ799E2jICY",
 									"type": "string"
 								}
 							]
@@ -2273,17 +3313,47 @@
 								},
 								{
 									"key": "name",
-									"value": "lolipop",
+									"value": "T-shirt-v4",
 									"type": "text"
 								},
 								{
 									"key": "image",
 									"type": "file",
-									"src": "/C:/Users/USER/Pictures/hk.jpg"
+									"src": [
+										"/C:/Users/USER/Desktop/t-shirt-v1.webp",
+										"/C:/Users/USER/Desktop/t-shirt-v1-brown.jpeg"
+									],
+									"disabled": true
 								},
 								{
 									"key": "description",
-									"value": "HP Laptop for sale for 700 usd",
+									"value": "T-shirt v4 is the most amamzing on the planet",
+									"type": "text"
+								},
+								{
+									"key": "price",
+									"value": "[10.0, 12.0, 15.0, 17.0, 15.0, 16.0, 19.0, 22.0, 23.0, 25.0, 36.0,24.0]",
+									"type": "text"
+								},
+								{
+									"key": "size",
+									"value": "[  \"L\", \"XL\", \"XXL\"]",
+									"type": "text"
+								},
+								{
+									"key": "color",
+									"value": "[\"Red\", \"Blue\", \"Green\",\"Brown\"]",
+									"type": "text"
+								},
+								{
+									"key": "commission",
+									"value": "",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "stock_alert",
+									"value": "5",
 									"type": "text"
 								}
 							]
@@ -2305,14 +3375,14 @@
 					"response": []
 				},
 				{
-					"name": "update a product",
+					"name": "Update a product",
 					"request": {
 						"auth": {
 							"type": "bearer",
 							"bearer": [
 								{
 									"key": "token",
-									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6IlVzZXIiLCJpYXQiOjE3MzQ2OTkxODUsImV4cCI6MTczNTMwMzk4NX0.Z7_lqhRGdK6fwCX5dlYKLMLLjjUfxGUZL2HfZRApr74",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6IkFkbWluIiwiaWF0IjoxNzM1MzA0MTIzLCJleHAiOjE3MzU5MDg5MjN9.2tb_ESvj0oPT3XRTsfNt7CQrAr0SROo3aQ799E2jICY",
 									"type": "string"
 								}
 							]
@@ -2329,26 +3399,65 @@
 							"mode": "formdata",
 							"formdata": [
 								{
+									"key": "user_id",
+									"value": "1",
+									"type": "text",
+									"disabled": true
+								},
+								{
 									"key": "name",
-									"value": "laptop",
-									"type": "text"
+									"value": "T-shirt",
+									"type": "text",
+									"disabled": true
 								},
 								{
 									"key": "image",
 									"type": "file",
-									"src": "/C:/Users/USER/Pictures/fifa.jpg",
+									"src": [
+										"/C:/Users/USER/Desktop/t-shirt-v1.webp",
+										"/C:/Users/USER/Desktop/t-shirt-v1-brown.jpeg"
+									],
 									"disabled": true
 								},
 								{
 									"key": "description",
-									"value": "HP Laptop for sale for 700 usd",
+									"value": "T-shirt v1 is the most amamzing on the planet",
 									"type": "text",
 									"disabled": true
+								},
+								{
+									"key": "price",
+									"value": "[10.0, 12.0, 15.0, 17.0,18.0,25.0,36.5]",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "size",
+									"value": "[\"S\", \"M\", \"L\", \"XL\"]",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "color",
+									"value": "[\"Red\", \"Blue\", \"Green\",\"Brown\"]",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "commission",
+									"value": "",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "stock_alert",
+									"value": "1",
+									"type": "text"
 								}
 							]
 						},
 						"url": {
-							"raw": "http://localhost:8080/api/products/1",
+							"raw": "http://localhost:8080/api/products/3",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -2357,7 +3466,7 @@
 							"path": [
 								"api",
 								"products",
-								"1"
+								"3"
 							]
 						},
 						"description": "This endpoint allows the creation of a new blog."
@@ -2366,6 +3475,222 @@
 				},
 				{
 					"name": "Delete product",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/blogs/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"blogs",
+								"1"
+							]
+						},
+						"description": "This endpoint allows deleting one blog by its id."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Product-Purchase-Management",
+			"item": [
+				{
+					"name": "Get All Purchases",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6IkFkbWluIiwiaWF0IjoxNzM1MzA0MTIzLCJleHAiOjE3MzU5MDg5MjN9.2tb_ESvj0oPT3XRTsfNt7CQrAr0SROo3aQ799E2jICY",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/product-purchases",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"product-purchases"
+							]
+						},
+						"description": "This endpoint allows selection one blog by passing the id as a parameter."
+					},
+					"response": []
+				},
+				{
+					"name": "Get A Purchase By Id",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6IkFkbWluIiwiaWF0IjoxNzM1MzA0MTIzLCJleHAiOjE3MzU5MDg5MjN9.2tb_ESvj0oPT3XRTsfNt7CQrAr0SROo3aQ799E2jICY",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/product-purchases/2",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"product-purchases",
+								"2"
+							]
+						},
+						"description": "This endpoint allows selection one blog by passing the id as a parameter."
+					},
+					"response": []
+				},
+				{
+					"name": "Create a purchase",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6IkFkbWluIiwiaWF0IjoxNzM1MzA0MTIzLCJleHAiOjE3MzU5MDg5MjN9.2tb_ESvj0oPT3XRTsfNt7CQrAr0SROo3aQ799E2jICY",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"product_id\": 3,\r\n  \"user_id\": 18,\r\n  \"size\": \"XL\",\r\n  \"color\": \"Brown\",\r\n  \"quantity\": 1\r\n}\r\n"
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/product-purchases",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"product-purchases"
+							]
+						},
+						"description": "This endpoint allows the creation of a new blog."
+					},
+					"response": []
+				},
+				{
+					"name": "Update Purchase",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6IkFkbWluIiwiaWF0IjoxNzM1MzA0MTIzLCJleHAiOjE3MzU5MDg5MjN9.2tb_ESvj0oPT3XRTsfNt7CQrAr0SROo3aQ799E2jICY",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  //\"product_id\": 1,\r\n  //\"user_id\": 1,\r\n  //\"size\": \"M\",\r\n  //\"color\": \"Red\",\r\n  \"quantity\": 4\r\n}\r\n"
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/product-purchases/2",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"product-purchases",
+								"2"
+							]
+						},
+						"description": "This endpoint allows the creation of a new blog."
+					},
+					"response": []
+				},
+				{
+					"name": "Complete purchase",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6IkFkbWluIiwiaWF0IjoxNzM1MzA0MTIzLCJleHAiOjE3MzU5MDg5MjN9.2tb_ESvj0oPT3XRTsfNt7CQrAr0SROo3aQ799E2jICY",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/product-purchases/complete/4",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"product-purchases",
+								"complete",
+								"4"
+							]
+						},
+						"description": "This endpoint allows the creation of a new blog."
+					},
+					"response": []
+				},
+				{
+					"name": "Delete purchase",
 					"request": {
 						"method": "DELETE",
 						"header": [],
@@ -2934,6 +4259,42 @@
 							]
 						},
 						"description": "Delete a specific page by ID"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Combined Api's For Pages",
+			"item": [
+				{
+					"name": "Get Admin Panel Data",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6IkFkbWluIiwiaWF0IjoxNzM1MzA0MTIzLCJleHAiOjE3MzU5MDg5MjN9.2tb_ESvj0oPT3XRTsfNt7CQrAr0SROo3aQ799E2jICY",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/combined-data/admin-panel-data",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"combined-data",
+								"admin-panel-data"
+							]
+						}
 					},
 					"response": []
 				}

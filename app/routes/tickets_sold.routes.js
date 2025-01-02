@@ -9,7 +9,7 @@ module.exports = (app) => {
     router.get("/tickets-sold/:id",authenticate, ticketSoldController.getTicketsSoldById);
     router.post("/tickets-sold/reserve",authenticate, ticketSoldController.reserveTickets);
     router.post("/tickets-sold/confirm-purchasing-tickets",authenticate, ticketSoldController.confirmPurchases);
-   // router.post("/tickets-sold/scan-qr-code",authenticate, ticketSoldController.scanQRCode);
+    router.delete("/tickets-sold/cancel-reservation/:id",authenticate, ticketSoldController.cancelReservation);
  
     
   

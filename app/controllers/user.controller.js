@@ -216,3 +216,149 @@ exports.deleteUser = async (req, res) => {
     res.status(500).json({ message: "Error deleting user", error: error.message });
   }
 };
+
+exports.getAccountsNeedingApproval = async (req, res) => {
+  try {
+    // Find all users where isApproved is false and role is 'Organizer'
+    const users = await User.findAll({
+      where: {
+        isApproved: false,
+        role: 'Organizer',
+      },
+    });
+
+    if (users.length === 0) {
+      return res.status(404).json({
+        message: "No organizer accounts needing approval found.",
+      });
+    }
+
+    res.status(200).json({
+      message: "Organizer accounts needing approval retrieved successfully",
+      data: users,
+    });
+  } catch (error) {
+    console.error("Error retrieving organizer accounts needing approval:", error);
+    res.status(500).json({
+      message: "Error retrieving organizer accounts needing approval",
+      error: error.message,
+    });
+  }
+};
+
+exports.getAccountsNeedingApproval = async (req, res) => {
+  try {
+    // Find all users where isApproved is false and role is 'Organizer'
+    const users = await User.findAll({
+      where: {
+        isApproved: false,
+        role: 'Organizer',
+      },
+    });
+
+    if (users.length === 0) {
+      return res.status(404).json({
+        message: "No organizer accounts needing approval found.",
+      });
+    }
+
+    res.status(200).json({
+      message: "Organizer accounts needing approval retrieved successfully",
+      data: users,
+    });
+  } catch (error) {
+    console.error("Error retrieving organizer accounts needing approval:", error);
+    res.status(500).json({
+      message: "Error retrieving organizer accounts needing approval",
+      error: error.message,
+    });
+  }
+};
+
+exports.createOperatorAccount = async (req, res) => {
+  try {
+    // Destructure request body
+    const { name, email, phone_number, birthdate, gender } = req.body;
+
+    // Check if the email already exists
+    const existingUser = await User.findOne({ where: { email } });
+    if (existingUser) {
+      return res.status(400).json({
+        message: "Email already exists in the system. Please use a different email."
+      });
+    }
+
+    // Generate a secure token and expiry
+    const token = crypto.randomBytes(32).toString("hex");
+    const tokenExpiry = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000); // 3 days from now
+
+    // Create the Operator account
+    const newOperator = await User.create({
+      name,
+      email,
+      phone_number,
+      birthdate,
+      gender,
+      role: 'Operator', // Set the role as Operator
+      isVerified: false, // Default to not verified
+      token, // Save the token
+      TokenExpires: tokenExpiry, // Save the expiry
+    });
+
+    // Construct the verification link
+    const verificationLink = `${process.env.BACKEND_URL}/api/auth/verify-email/render-verfication/${token}`;
+
+    // Compose the verification email
+    const mailOptions = {
+      from: process.env.EMAIL_USER,
+      to: newOperator.email,
+      subject: "Verify Your Operator Account",
+      html: `
+        <div style="font-family: Arial, sans-serif; line-height: 1.5; color: #333;">
+          <p>Hello ${newOperator.name || "User"},</p>
+          <p>Please click the button below to set your password and complete your registration:</p>
+          <a href="${verificationLink}" 
+            style="display: inline-block; margin: 20px 0; padding: 12px 20px; font-size: 16px; font-weight: bold; color: white; background-color: #007BFF; text-decoration: none; border-radius: 4px;">
+            Verify Account
+          </a>
+          <p style="margin-top: 20px; font-size: 12px; color: #777; text-align: center;">
+            If you did not request this, please ignore this email.
+          </p>
+        </div>
+      `,
+    };
+
+    // Send the email
+    transporter.sendMail(mailOptions, async (err, info) => {
+      if (err) {
+        console.error("Error sending verification email:", err);
+
+        // Optionally delete the user if email sending fails
+        await newOperator.destroy();
+
+        return res.status(500).json({
+          message: "Failed to send verification email",
+          error: err.message,
+        });
+      } else {
+        console.log("Verification email sent:", info.response);
+        res.status(201).json({
+          message: "Operator account created successfully. Verification email sent.",
+          data: {
+            id: newOperator.id,
+            email: newOperator.email,
+            name: newOperator.name,
+            isVerified: newOperator.isVerified, // Default is false
+          },
+        });
+      }
+    });
+  } catch (error) {
+    console.error("Error creating Operator account:", error);
+    res.status(500).json({
+      message: "Error creating Operator account",
+      error: error.message
+    });
+  }
+};
+

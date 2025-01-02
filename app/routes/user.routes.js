@@ -7,9 +7,11 @@ module.exports = (app) => {
   const upload = require("../middleware/uploadMiddleware"); // Import multer middleware
 
 // only admin can create and delete a user , a user can update his data but nit all to be set later
+  router.get('/users/approval-needed',authenticate, userController.getAccountsNeedingApproval);
   router.get('/users', authenticate, userController.getAllUsers);
   router.get('/users/:id', authenticate, userController.getUserById);
   router.post('/users', authenticate,upload.single("profile_picture"), checkPermission('create-user'), userController.createUser);
+  router.post("/users/operator", authenticate, checkPermission('create-operator'), userController.createOperatorAccount);
   router.put('/users/:id', authenticate,upload.single("profile_picture"), checkPermission('update-user'), userController.updateUser);
   router.delete('/users/:id', authenticate, checkPermission('delete-user'), userController.deleteUser);
 

@@ -60,21 +60,28 @@ WAL-WP-BE/
 │   ├── Permission.js
 |   ├── Hobby.js
 |   ├── comments.js
+|   ├── tickets_sold.js
+|   ├── product_purchase.js
+|   ├── notifications.js
 ├── controllers/
 │   ├── userController.js
 |   ├── authCpntroller.js
 │   ├── Profile_Details.controller.js
 │   ├── eventController.js
 │   ├── ticketController.js
+│   ├── ticketSoldController.js
 │   ├── blogController.js
 │   ├── likesController.js
 │   ├── commentsController.js
 │   ├── viewsController.js
 │   ├── productsController.js
+│   ├── productsPurchaseController.js
 │   ├── couponController.js
 │   ├── PermissionController.js
 │   ├── HobbyController.js
 │   ├── categoryController.js
+│   ├── notification.controller.js
+│   ├── combined_data.controller.js
 ├── routes/
 │   ├── userRoutes.js
 |   ├── authRoutes.js
@@ -90,6 +97,10 @@ WAL-WP-BE/
 │   ├── PermissionRoutes.js
 │   ├── HobbyRoutes.js
 │   ├── likesRoutes.js
+│   ├── combined_data.routes.js
+│   ├── notification.routes.js
+│   ├── product_purchase.routes.js
+│   ├── tickets_sold.routes.js
 ├── utils/
 │   ├── helpers.js
 │   ├── generateToken.js

@@ -50,7 +50,16 @@ module.exports = (sequelize, Sequelize) => {
         type: Sequelize.INTEGER,
         allowNull: false,
       },
-
+      status: {
+        type: Sequelize.ENUM("pending", "in-progress", "canceled","done"),
+        defaultValue: "pending",
+      },
+      total_revenue: {
+        type: Sequelize.DECIMAL(10, 2),
+        allowNull: true,
+        defaultValue: 0.0, // Default total revenue is 0
+      },
+      
     },
     { timestamps: true }
   );

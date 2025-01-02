@@ -179,3 +179,31 @@ exports.deleteTicketById = async (req, res) => {
   }
 };
 
+exports.updateTotalRevenue = async (ticketId) => {
+  try {
+    // Find the ticket and its associated event
+    const ticket = await Tickets.findByPk(ticketId, {
+      include: [
+        {
+          model: Event,
+          attributes: ["id", "commission", "total_revenue"],
+        },
+      ],
+    });
+
+    if (!ticket || !ticket.Event) {
+      console.error("Ticket or associated Event not found");
+      return;
+    }
+
+    // Calculate the total revenue
+    const { Event: event } = ticket;
+    const totalRevenue = parseFloat(event.commission) * parseFloat(ticket.tickets_sold_count_sum_price || 0) / 100;
+
+    // Update the event's total_revenue field
+    await event.update({ total_revenue: totalRevenue });
+    console.log(`Total revenue for event ID ${event.id} updated successfully.`);
+  } catch (error) {
+    console.error("Error updating total revenue:", error.message);
+  }
+};

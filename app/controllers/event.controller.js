@@ -47,7 +47,8 @@ exports.createEvent = async (req, res) => {
       ticket_maps,
       commission,
       is_approved,
-      ticket_alert
+      ticket_alert,
+      status
     } = req.body;
 
     // Check if the organizer exists
@@ -102,7 +103,8 @@ exports.createEvent = async (req, res) => {
       ticket_maps: ticketMapPath,
       commission: eventCommission,
       is_approved: approvalStatus,
-      ticket_alert
+      ticket_alert,
+      status: status || "pending",
     });
 
     // If the organizer is not an admin, send a notification to admins
@@ -135,7 +137,7 @@ exports.updateEvent = async (req, res) => {
     if (!event) return res.status(404).json({ message: "Event not found" });
 
     const updates = {};
-    const { title, description, date_time, location, seated, ticket_maps , commission, is_approved} = req.body;
+    const { title, description, date_time, location, seated, ticket_maps , commission, is_approved,status} = req.body;
 
     // Update title if provided
     if (title) updates.title = title;
@@ -144,10 +146,13 @@ exports.updateEvent = async (req, res) => {
     if (description) updates.description = description;
 
     //Update commision if provided
-    if(commission) updates.commission= commission
+    if(commission) updates.commission= commission;
 
     //Update is_approved if provided
-    if(is_approved) updates.is_approved= is_approved
+    if(is_approved) updates.is_approved= is_approved;
+
+    //Update status if provided
+    if(status) updates.status= status;
 
     // Validate and update date_time if provided
     if (date_time) {
