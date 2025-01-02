@@ -10,6 +10,7 @@ module.exports = (app) => {
     // everyone can create update a profile but only admin can delete a profile
     router.get("/profiles", authenticate, profileController.getAllProfiles);
     router.get("/profiles/:id", authenticate, profileController.getProfileById);
+    router.get('/profiles/for-user/:user_id', authenticate, profileController.getProfilesByUserId);
     router.post(
       "/profiles",
       authenticate,

@@ -8,8 +8,11 @@ module.exports = (app) => {
     // Get all product-purchases
     router.get("/product-purchases", authenticate, checkPermission("read-product-purchase"), purchaseController.getAllPurchases);
   
-    // Get aproduct-purchases by ID
+    // Get a product-purchases by ID
     router.get("/product-purchases/:id", authenticate, checkPermission("read-product-purchase"), purchaseController.getPurchaseById);
+
+    // Get a product-purchases by user ID
+    router.get('/product-purchases/for-user/:user_id', authenticate, purchaseController.getPurchasesByUserId);
   
     // Create a new product-purchases
     router.post("/product-purchases", authenticate, checkPermission("create-product-purchase"), purchaseController.createPurchase);

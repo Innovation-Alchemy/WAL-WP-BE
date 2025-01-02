@@ -54,6 +54,9 @@ require("./app/routes/product.routes")(app);
 require("./app/routes/product_purchase.routes")(app);
 require("./app/routes/notification.routes")(app);
 require("./app/routes/combined_data.routes")(app);
+require("./app/routes/news.routes")(app);
+require("./app/routes/advertisement.routes")(app);
+require("./cron");
 
 // Start server
 const PORT = process.env.PORT || 8080;

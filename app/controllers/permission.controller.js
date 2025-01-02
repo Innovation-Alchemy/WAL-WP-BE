@@ -16,20 +16,75 @@ exports.getAllPermissions = async (req, res) => {
   }
 };
 
-// ** Add a New Permission **
-exports.addPermission = async (req, res) => {
-  const { error } = addPermissionSchema.validate(req.body);
-  if (error) {
-    return res.status(400).json({ message: error.details[0].message });
-  }
-
+// ** Add a New Permission and Assign to Roles **
+exports.addPermissionAndAssignToRoles = async (req, res) => {
   try {
-    const { name } = req.body;
+    // Validate the input using Joi schema
+    const { error } = addPermissionSchema.validate(req.body);
+    if (error) {
+      return res.status(400).json({ message: error.details[0].message });
+    }
+    const { name, roles } = req.body;
+
+    // Validate input
+    if (!name) {
+      return res.status(400).json({ message: "Permission name is required." });
+    }
+    if (!Array.isArray(roles) || roles.length === 0) {
+      return res.status(400).json({ message: "At least one role must be specified." });
+    }
+
+    // Validate roles
+    const validRoles = ["Admin", "Organizer", "Operator", "User"];
+    const invalidRoles = roles.filter((role) => !validRoles.includes(role));
+    if (invalidRoles.length > 0) {
+      return res.status(400).json({
+        message: `Invalid roles provided: ${invalidRoles.join(", ")}. Valid roles are: ${validRoles.join(", ")}.`,
+      });
+    }
+
+    // Create the new permission
     const newPermission = await Permission.create({ name });
-    res.status(201).json({ success: true, data: newPermission });
+
+    // Find all users in the specified roles
+    const usersToUpdate = await User.findAll({
+      where: {
+        role: {
+          [db.Sequelize.Op.in]: roles,
+        },
+      },
+    });
+
+    // Update permissions for each user
+    for (const user of usersToUpdate) {
+      let currentPermissions = [];
+
+      // Parse existing permissions if they exist
+      if (Array.isArray(user.permissions)) {
+        currentPermissions = user.permissions;
+      } else if (typeof user.permissions === "string") {
+        try {
+          currentPermissions = JSON.parse(user.permissions);
+        } catch (error) {
+          currentPermissions = [];
+        }
+      }
+
+      // Add the new permission to the user's permissions
+      const updatedPermissions = [...new Set([...currentPermissions, newPermission.id])];
+
+      // Save the updated permissions as an array
+      user.permissions = updatedPermissions;
+      await user.save();
+    }
+
+    res.status(201).json({
+      message: `Permission created and assigned successfully to roles: ${roles.join(", ")}.`,
+      data: newPermission,
+    });
   } catch (error) {
-    const status = error.name === 'SequelizeUniqueConstraintError' ? 409 : 400;
-    res.status(status).json({ message: 'Error adding permission', error: error.message });
+    console.error("Error adding permission and assigning to roles:", error);
+    res.status(500).json({ message: "Error adding permission and assigning to roles.", error: error.message });
   }
 };
 
@@ -84,7 +139,6 @@ exports.updatePermission = async (req, res) => {
     res.status(500).json({ message: "Error updating permission", error: error.message });
   }
 };
-
 
 // ** Delete Permission by ID **
 exports.deletePermission = async (req, res) => {

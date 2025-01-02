@@ -41,6 +41,59 @@ exports.getHobbyById = async (req, res) => {
   }
 };
 
+exports.getHobbiesByUserId = async (req, res) => {
+  const { user_id } = req.params;
+
+  if (!user_id) {
+    return res.status(400).json({ message: "User ID is required." });
+  }
+
+  try {
+    // Find the user by ID
+    const user = await User.findByPk(user_id, {
+      attributes: ["id", "name", "hobbies"],
+    });
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found." });
+    }
+
+    // Parse the hobbies field if necessary
+    let userHobbies = [];
+    if (Array.isArray(user.hobbies)) {
+      userHobbies = user.hobbies;
+    } else if (typeof user.hobbies === "string") {
+      try {
+        userHobbies = JSON.parse(user.hobbies);
+      } catch (e) {
+        return res
+          .status(500)
+          .json({ message: "Error parsing hobbies for the user." });
+      }
+    }
+
+    // Fetch hobby details
+    const hobbies = await Hobby.findAll({
+      where: { id: userHobbies },
+      attributes: ["id", "name"],
+    });
+
+    res.status(200).json({
+      message: "Hobbies retrieved successfully.",
+      data: {
+        user: { id: user.id, name: user.name },
+        hobbies,
+      },
+    });
+  } catch (error) {
+    console.error("Error retrieving hobbies by user ID:", error);
+    res.status(500).json({
+      message: "Error retrieving hobbies by user ID.",
+      error: error.message,
+    });
+  }
+};
+
 exports.addHobby = async (req, res) => {
   const { error } = addHobbySchema.validate(req.body);
   if (error) {

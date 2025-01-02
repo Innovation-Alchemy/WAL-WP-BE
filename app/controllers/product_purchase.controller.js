@@ -36,6 +36,36 @@ exports.getPurchaseById = async (req, res) => {
   }
 };
 
+// Get purchases by User ID
+exports.getPurchasesByUserId = async (req, res) => {
+  const { user_id } = req.params;
+
+  if (!user_id) {
+    return res.status(400).json({ message: "User ID is required." });
+  }
+
+  try {
+    // Find purchases by the specified user ID
+    const purchases = await ProductPurchase.findAll({
+      where: { user_id },
+      include: [
+        { model: Product, attributes: ["id", "name", "price", "image"] },
+        { model: User, attributes: ["id", "name", "email"] },
+      ],
+      order: [["createdAt", "DESC"]],
+    });
+
+    if (!purchases || purchases.length === 0) {
+      return res.status(404).json({ message: "No purchases found for this user." });
+    }
+
+    res.status(200).json({ message: "Purchases retrieved successfully", data: purchases });
+  } catch (error) {
+    console.error("Error retrieving purchases by user ID:", error);
+    res.status(500).json({ message: "Error retrieving purchases by user ID", error: error.message });
+  }
+};
+
 // Create a new purchase
 exports.createPurchase = async (req, res) => {
   try {
@@ -115,9 +145,7 @@ exports.createPurchase = async (req, res) => {
   }
 };
 
-  
-
-  exports.completePurchase = async (req, res) => {
+exports.completePurchase = async (req, res) => {
     try {
       const { purchase_id } = req.params;
   
@@ -193,10 +221,8 @@ exports.createPurchase = async (req, res) => {
       console.error("Error completing purchase:", error);
       res.status(500).json({ message: "Error completing purchase", error: error.message });
     }
-  };
+};
   
-
-
 // Update a purchase
 exports.updatePurchase = async (req, res) => {
   try {

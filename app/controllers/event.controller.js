@@ -14,7 +14,6 @@ exports.getAllEvents = async (req, res) => {
     res.status(500).json({ message: "Error retrieving events", error: error.message });
   }
 };
-
 // Get event by ID
 exports.getEventById = async (req, res) => {
   try {
@@ -26,7 +25,31 @@ exports.getEventById = async (req, res) => {
     res.status(500).json({ message: "Error retrieving event", error: error.message });
   }
 };
+// Get events by User ID (Organizer ID)
+exports.getEventsByUserId = async (req, res) => {
+  try {
+    const { user_id } = req.params;
 
+    if (!user_id) {
+      return res.status(400).json({ message: "User ID is required." });
+    }
+
+    // Find events by the specified user (organizer ID)
+    const events = await Event.findAll({
+      where: { organizer_id: user_id },
+      include: [{ model: Organizer, attributes: ["id", "name", "email"] }], // Include organizer info
+    });
+
+    if (!events || events.length === 0) {
+      return res.status(404).json({ message: "No events found for this user." });
+    }
+
+    res.status(200).json({ message: "Events retrieved successfully", data: events });
+  } catch (error) {
+    console.error("Error retrieving events by user ID:", error);
+    res.status(500).json({ message: "Error retrieving events by user ID", error: error.message });
+  }
+};
 // Create a new event
 exports.createEvent = async (req, res) => {
   const { error } = createEventSchema.validate(req.body);
@@ -204,7 +227,6 @@ exports.updateEvent = async (req, res) => {
     res.status(500).json({ message: "Error updating event", error: error.message });
   }
 };
-
 
 // Delete an event
 exports.deleteEvent = async (req, res) => {

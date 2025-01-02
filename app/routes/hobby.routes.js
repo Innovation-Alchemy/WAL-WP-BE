@@ -14,6 +14,9 @@ module.exports = (app) => {
     // ** Get a specific hobby by ID **
     router.get('/hobbies/:id', authenticate, hobbyController.getHobbyById);
 
+    // ** Get a specific hobby For user By user ID **
+    router.get('/hobbies/for-user/:user_id', authenticate, hobbyController.getHobbiesByUserId);
+
     // ** Add a new hobby **
     router.post('/hobbies', authenticate,checkPermission('create-hobbies'), hobbyController.addHobby);
   

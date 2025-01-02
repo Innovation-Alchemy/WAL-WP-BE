@@ -150,7 +150,6 @@ exports.updateBlog = async (req, res) => {
   }
 };
 
-
 /**
  * Delete a blog by ID
  */
@@ -169,3 +168,30 @@ exports.deleteBlog = async (req, res) => {
   }
 };
 
+/**
+ * Retrieve blogs by user ID
+ */
+exports.getBlogsByUserId = async (req, res) => {
+  try {
+    const { user_id } = req.params; // Updated to match the route parameter name
+
+    if (!user_id) {
+      return res.status(400).json({ message: "User ID is required." });
+    }
+
+    // Find blogs by the specified user ID
+    const blogs = await Blog.findAll({
+      where: { user_id },
+      include: [{ model: User, attributes: ["id", "name", "email"] }], // Include user info
+    });
+
+    if (!blogs || blogs.length === 0) {
+      return res.status(404).json({ message: "No blogs found for this user." });
+    }
+
+    res.status(200).json({ message: "Blogs retrieved successfully", data: blogs });
+  } catch (error) {
+    console.error("Error retrieving blogs by user ID:", error);
+    res.status(500).json({ message: "Error retrieving blogs by user ID", error: error.message });
+  }
+};

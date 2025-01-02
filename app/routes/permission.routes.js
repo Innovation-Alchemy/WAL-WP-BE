@@ -14,7 +14,7 @@ module.exports = (app) => {
     '/permissions',
     authenticate,
     checkPermission('create-permission'),
-    permissionController.addPermission
+    permissionController.addPermissionAndAssignToRoles
   );
 
   // ** Assign permissions to a user (by userType and user ID) **

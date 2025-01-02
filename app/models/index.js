@@ -34,6 +34,8 @@ db.views = require("./views.model")(sequelize, Sequelize);
 db.TicketsSold = require("./tickets_sold.model")(sequelize, Sequelize);
 db.ProductPurchase = require("./product_purchase.model")(sequelize, Sequelize);
 db.notification =require("./notification.model")(sequelize, Sequelize);
+db.News = require("./news.model")(sequelize, Sequelize);
+db.Advertisement = require("./advertisement.model")(sequelize, Sequelize);
 
 // Define Relationships
 db.User.hasMany(db.Event, { foreignKey: "organizer_id", onDelete: "CASCADE" });
@@ -62,6 +64,14 @@ db.Coupon.belongsTo(db.Product, { foreignKey: "product_id" });
 
 db.User.hasMany(db.Coupon, { foreignKey: "user_id", onDelete: "CASCADE" });
 db.Coupon.belongsTo(db.User, { foreignKey: "user_id" });
+
+// Advertisement and user role admin  (Many-to-one)
+db.Advertisement.belongsTo(db.User, { foreignKey: "admin_id", onDelete: "CASCADE" });
+db.User.hasMany(db.Advertisement, { foreignKey: "admin_id", onDelete: "CASCADE" });
+
+// News and user role admin  (Many-to-one)
+db.News.belongsTo(db.User, { foreignKey: "admin_id", onDelete: "CASCADE" });
+db.User.hasMany(db.News, { foreignKey: "admin_id", onDelete: "CASCADE" });
 
 // User - Notification association (User has many notifications)
 db.User.hasMany(db.notification, { foreignKey: "user_id", onDelete: "CASCADE" });

@@ -154,17 +154,29 @@ const notificationValidationSchema = Joi.object({
   }),
 });
 
-// Input Validation permission schema
+// Input Validation Schema
 const addPermissionSchema = Joi.object({
   name: Joi.string()
     .min(3)
     .max(50)
     .required()
     .messages({
-      'string.base': 'Permission name must be a string.',
-      'string.min': 'Permission name must have at least 3 characters.',
-      'string.max': 'Permission name can have at most 50 characters.',
-      'any.required': 'Permission name is required.',
+      "string.base": "Permission name must be a string.",
+      "string.min": "Permission name must have at least 3 characters.",
+      "string.max": "Permission name can have at most 50 characters.",
+      "any.required": "Permission name is required.",
+    }),
+  roles: Joi.array()
+    .items(
+      Joi.string().valid("Admin", "Organizer", "Operator", "User")
+    )
+    .min(1)
+    .required()
+    .messages({
+      "array.base": "Roles must be an array of valid role names.",
+      "array.items": "Each role must be one of: Admin, Organizer, Operator, User.",
+      "array.min": "At least one role must be specified.",
+      "any.required": "Roles are required.",
     }),
 });
 
@@ -623,6 +635,97 @@ const createNotificationSchema = Joi.object({
   }),
 });
 
+// Joi Validation Schema for News
+const newsValidationSchema = Joi.object({
+  admin_id: Joi.number().integer().required().messages({
+    'number.base': 'admin_id must be a number',
+    'any.required': 'admin_id is required',
+  }),
+  title: Joi.string().required().messages({
+    'string.base': 'Title must be a string',
+    'any.required': 'Title is required',
+  }),
+  content: Joi.string().required().messages({
+    'string.base': 'Content must be a string',
+    'any.required': 'Content is required',
+  }),
+  category: Joi.string().required().messages({
+    'string.base': 'Category must be a string',
+    'any.required': 'Category is required',
+  }),
+  language: Joi.string().valid('en', 'ar').required().messages({
+    'any.only': 'language must be either en or ar',
+    'any.required': 'language is required',
+  }),
+  published_at: Joi.date().optional().messages({
+    'date.base': 'Published date must be a valid date',
+  }),
+  images: Joi.array().items(Joi.string().uri()).optional().messages({
+    'array.base': 'Images must be an array of URLs',
+  }),
+});
+
+const advertisementValidationSchema = Joi.object({
+  admin_id: Joi.number()
+    .integer()
+    .required()
+    .messages({
+      "number.base": "admin_id must be a number.",
+      "any.required": "admin_id is required.",
+    }),
+  title: Joi.string()
+    .min(3)
+    .max(100)
+    .required()
+    .messages({
+      "string.base": "Title must be a string.",
+      "string.min": "Title must be at least 3 characters long.",
+      "string.max": "Title cannot exceed 100 characters.",
+      "any.required": "Title is required.",
+    }),
+  description: Joi.string()
+    .allow(null, "")
+    .max(500)
+    .messages({
+      "string.base": "Description must be a string.",
+      "string.max": "Description cannot exceed 500 characters.",
+    }),
+  target_audience: Joi.string()
+    .allow(null, "")
+    .max(255)
+    .messages({
+      "string.base": "Target audience must be a string.",
+      "string.max": "Target audience cannot exceed 255 characters.",
+    }),
+  start_date: Joi.date()
+    .iso()
+    .required()
+    .messages({
+      "date.base": "Start date must be a valid ISO date.",
+      "any.required": "Start date is required.",
+    }),
+  end_date: Joi.date()
+    .iso()
+    .greater(Joi.ref("start_date"))
+    .required()
+    .messages({
+      "date.base": "End date must be a valid ISO date.",
+      "date.greater": "End date must be after the start date.",
+      "any.required": "End date is required.",
+    }),
+  images: Joi.array()
+    .items(
+      Joi.string().uri().messages({
+        "string.uri": "Each image must be a valid URL.",
+      })
+    )
+    .optional()
+    .messages({
+      "array.base": "Images must be an array of valid URLs.",
+    }),
+});
+
+
   module.exports = {
     AuthVAlSchema,
     LoginVAlSchema,
@@ -645,5 +748,7 @@ const createNotificationSchema = Joi.object({
     reserveTicketSchema,
     confirmPurchaseSchema,
     cancelReservationSchema,
-    createNotificationSchema 
+    createNotificationSchema ,
+    newsValidationSchema,
+    advertisementValidationSchema
 };

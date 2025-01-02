@@ -24,6 +24,45 @@ exports.getProfileById = async (req, res) => {
   }
 };
 
+// Get profiles by User ID
+exports.getProfilesByUserId = async (req, res) => {
+  const { user_id } = req.params;
+
+  if (!user_id) {
+    return res.status(400).json({ message: "User ID is required." });
+  }
+
+  try {
+    // Find profiles by the specified user ID
+    const profiles = await Profile.findAll({
+      where: { user_id },
+      attributes: [
+        "id",
+        "name",
+        "description",
+        "website",
+        "facebook",
+        "instagram",
+        "twitter",
+        "linkedin",
+        "address",
+        "city",
+        "profile_picture",
+        "cover_photo",
+      ],
+    });
+
+    if (!profiles || profiles.length === 0) {
+      return res.status(404).json({ message: "No profiles found for this user." });
+    }
+
+    res.status(200).json({ message: "Profiles retrieved successfully", data: profiles });
+  } catch (error) {
+    console.error("Error retrieving profiles by user ID:", error);
+    res.status(500).json({ message: "Error retrieving profiles by user ID", error: error.message });
+  }
+};
+
 exports.createProfile = async (req, res) => {
     try {
       const { name, user_id, description, website, facebook, instagram, twitter, linkedin, address, city } = req.body;
@@ -74,9 +113,8 @@ exports.createProfile = async (req, res) => {
       console.error("Error creating profile:", error);
       res.status(500).json({ message: "Error creating profile", error: error.message });
     }
-  };
+};
   
-
 exports.updateProfile = async (req, res) => {
   try {
     const profileId = req.params.id;

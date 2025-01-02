@@ -30,7 +30,7 @@ module.exports = (sequelize, Sequelize) => {
       allowNull: false,
     },
     status: {
-      type: Sequelize.ENUM("pending","reserved", "sold","canceled"),
+      type: Sequelize.ENUM("pending","reserved", "sold","canceled","used"),
       defaultValue: "pending",
     },
     reserved_at: {
@@ -41,7 +41,10 @@ module.exports = (sequelize, Sequelize) => {
       type: Sequelize.TEXT,
       allowNull: true,
     },
-   
+    qr_code_token: {
+      type: Sequelize.TEXT,
+      allowNull: true,
+    },
   });
 
   return TicketsSold;

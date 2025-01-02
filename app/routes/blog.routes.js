@@ -11,6 +11,8 @@ module.exports = (app) => {
     router.get('/blogs', authenticate, blogController.getAllBlogs);
     // evryone can see blogs so no need for permissions
     router.get('/blogs/:id', authenticate, blogController.getBlogById);
+     
+    router.get('/blogs/for-user/:user_id', authenticate, blogController.getBlogsByUserId);
     // only organizer and admin can create a blog and organizer needs an approval after creating the blog
     router.post('/blogs', upload.array("files", 10), authenticate,checkPermission('create-blog'), blogController.createBlog);
     // only admin and organizer can update a blog
