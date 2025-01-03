@@ -78,19 +78,39 @@ exports.createUser = async (req, res) => {
       from: process.env.EMAIL_USER,
       to: newUser.email,
       subject: "Verify Your Account",
-      html: `
-        <div style="font-family: Arial, sans-serif; line-height: 1.5; color: #333;">
-          <p>Hello ${newUser.name || "User"},</p>
-          <p>Please click the button below to set your password and complete your registration:</p>
-          <a href="${verificationLink}" 
-            style="display: inline-block; margin: 20px 0; padding: 12px 20px; font-size: 16px; font-weight: bold; color: white; background-color: #007BFF; text-decoration: none; border-radius: 4px;">
-            Verify Account
-          </a>
-          <p style="margin-top: 20px; font-size: 12px; color: #777; text-align: center;">
-            If you did not request this, please ignore this email.
-          </p>
+    html: `
+        <div style="background-color: #150D0D; font-family: Arial, sans-serif; color: #FFFFFF; padding: 20px;">
+          <div style="text-align: center; margin-bottom: 20px;">
+            <img src="https://wearelebanon.guide/WALLogo.png" alt="We Are Lebanon Logo" width="363" height="184" style="max-width: 100%; height: auto;" />
+          </div>
+          <div style="background: radial-gradient(circle, #926060 0%, #843434 100%); border-radius: 10px; padding: 20px; max-width: 600px; margin: 0 auto; text-align: center;">
+            <h2 style="margin-bottom: 20px;">Welcome to We Are Lebanon, ${newUser.name || "User"}!</h2>
+            <p style="margin-bottom: 20px;">Please click the button below to set your password and complete your registration:</p>
+            <a href="${verificationLink}" 
+              style="
+                display: inline-block;
+                padding: 10px 20px;
+                background-color: #F9A8AE;
+                color: #7B2128;
+                text-decoration: none;
+                border-radius: 5px;
+                font-size: 16px;
+                font-weight: bold;
+                margin-bottom: 20px;">
+              Verify Account
+            </a>
+            <p>If the button above doesn't work, copy and paste the following link into your browser:</p>
+            <p style="word-wrap: break-word; color: #ffffff;">
+              <a href="${verificationLink}" style="color: #F9A8AE; text-decoration: underline;">${verificationLink}</a>
+            </p>
+            <p style="margin-top: 20px;">If you did not request this, you can safely ignore this email.</p>
+          </div>
+          <div style="margin-top: 20px; text-align: center; font-size: 12px; color: #AAAAAA;">
+            <p>We Are Lebanon, All rights reserved.</p>
+          </div>
         </div>
       `,
+
     };
 
     // Send the email
@@ -304,7 +324,8 @@ exports.createOperatorAccount = async (req, res) => {
       token, // Save the token
       TokenExpires: tokenExpiry, // Save the expiry
     });
-
+   // Assign default permissions based on role
+   await assignDefaultPermissions(newOperator.id, newOperator.role);
     // Construct the verification link
     const verificationLink = `${process.env.BACKEND_URL}/api/auth/verify-email/render-verfication/${token}`;
 
@@ -314,16 +335,35 @@ exports.createOperatorAccount = async (req, res) => {
       to: newOperator.email,
       subject: "Verify Your Operator Account",
       html: `
-        <div style="font-family: Arial, sans-serif; line-height: 1.5; color: #333;">
-          <p>Hello ${newOperator.name || "User"},</p>
-          <p>Please click the button below to set your password and complete your registration:</p>
-          <a href="${verificationLink}" 
-            style="display: inline-block; margin: 20px 0; padding: 12px 20px; font-size: 16px; font-weight: bold; color: white; background-color: #007BFF; text-decoration: none; border-radius: 4px;">
-            Verify Account
-          </a>
-          <p style="margin-top: 20px; font-size: 12px; color: #777; text-align: center;">
-            If you did not request this, please ignore this email.
-          </p>
+        <div style="background-color: #150D0D; font-family: Arial, sans-serif; color: #FFFFFF; padding: 20px;">
+          <div style="text-align: center; margin-bottom: 20px;">
+            <img src="https://wearelebanon.guide/WALLogo.png" alt="We Are Lebanon Logo" width="363" height="184" style="max-width: 100%; height: auto;" />
+          </div>
+          <div style="background: radial-gradient(circle, #926060 0%, #843434 100%); border-radius: 10px; padding: 20px; max-width: 600px; margin: 0 auto; text-align: center;">
+            <h2 style="margin-bottom: 20px;">Welcome to We Are Lebanon, ${newOperator.name || "User"}!</h2>
+            <p style="margin-bottom: 20px;">Please click the button below to set your password and complete your registration:</p>
+            <a href="${verificationLink}" 
+              style="
+                display: inline-block;
+                padding: 10px 20px;
+                background-color: #F9A8AE;
+                color: #7B2128;
+                text-decoration: none;
+                border-radius: 5px;
+                font-size: 16px;
+                font-weight: bold;
+                margin-bottom: 20px;">
+              Verify Account
+            </a>
+            <p>If the button above doesn't work, copy and paste the following link into your browser:</p>
+            <p style="word-wrap: break-word; color: #ffffff;">
+              <a href="${verificationLink}" style="color: #F9A8AE; text-decoration: underline;">${verificationLink}</a>
+            </p>
+            <p style="margin-top: 20px;">If you did not request this, you can safely ignore this email.</p>
+          </div>
+          <div style="margin-top: 20px; text-align: center; font-size: 12px; color: #AAAAAA;">
+            <p>We Are Lebanon, All rights reserved.</p>
+          </div>
         </div>
       `,
     };

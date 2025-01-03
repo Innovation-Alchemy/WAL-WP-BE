@@ -63,6 +63,7 @@ WAL-WP-BE/
 |   ├── tickets_sold.js
 |   ├── product_purchase.js
 |   ├── notifications.js
+|   ├── password_reset_token.js
 ├── controllers/
 │   ├── userController.js
 |   ├── authCpntroller.js
@@ -82,6 +83,7 @@ WAL-WP-BE/
 │   ├── categoryController.js
 │   ├── notification.controller.js
 │   ├── combined_data.controller.js
+│   ├── password_reset_token.controller.js
 ├── routes/
 │   ├── userRoutes.js
 |   ├── authRoutes.js
@@ -101,6 +103,7 @@ WAL-WP-BE/
 │   ├── notification.routes.js
 │   ├── product_purchase.routes.js
 │   ├── tickets_sold.routes.js
+│   ├── password_reset_token.routes.js
 ├── utils/
 │   ├── helpers.js
 │   ├── generateToken.js

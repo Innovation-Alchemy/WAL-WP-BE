@@ -56,6 +56,7 @@ require("./app/routes/notification.routes")(app);
 require("./app/routes/combined_data.routes")(app);
 require("./app/routes/news.routes")(app);
 require("./app/routes/advertisement.routes")(app);
+require("./app/routes/forget_password_token.routes")(app);
 require("./cron");
 
 // Start server

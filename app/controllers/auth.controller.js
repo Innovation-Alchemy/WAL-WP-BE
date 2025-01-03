@@ -365,27 +365,33 @@ exports.renderVerificationForm = async (req, res) => {
       <head>
           <meta charset="UTF-8">
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <title>Verify Email & Set Password</title>
+          <title>Set Your Password</title>
           <style>
               body {
                   font-family: Arial, sans-serif;
                   margin: 0;
                   padding: 0;
-                  background: linear-gradient(135deg, #ff0000, #000000);
-                  color: #ffffff;
-                  height: 100vh;
+                  background: linear-gradient(135deg, #150D0D, #7B2128);
+                  color: #FFFFFF;
                   display: flex;
                   justify-content: center;
                   align-items: center;
+                  height: 100vh;
               }
               .container {
-                  background-color: rgba(0, 0, 0, 0.85);
-                  padding: 30px;
+                  background: radial-gradient(circle, #926060 0%, #843434 100%);
                   border-radius: 10px;
-                  box-shadow: 0 4px 8px rgba(255, 255, 255, 0.1);
-                  text-align: center;
+                  padding: 30px;
                   max-width: 400px;
                   width: 100%;
+                  text-align: center;
+                  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+              }
+              .logo {
+                  margin-bottom: 20px;
+              }
+              .logo img {
+                  width: 200px;
               }
               .container h1 {
                   font-size: 24px;
@@ -399,24 +405,23 @@ exports.renderVerificationForm = async (req, res) => {
                   width: calc(100% - 20px);
                   padding: 10px;
                   margin: 10px auto;
-                  border: 1px solid #ff0000;
+                  border: 1px solid #FFFFFF;
                   border-radius: 5px;
                   background-color: #333333;
-                  color: #ffffff;
+                  color: #FFFFFF;
                   font-size: 14px;
               }
               .container button {
-                  background-color: #ff0000;
-                  color: #ffffff;
+                  background-color: #F9A8AE;
+                  color: #7B2128;
                   border: none;
                   padding: 10px 20px;
                   font-size: 16px;
                   border-radius: 5px;
                   cursor: pointer;
-                  margin-top: 10px;
               }
               .container button:hover {
-                  background-color: #cc0000;
+                  background-color: #E5878F;
               }
               .message {
                   display: none;
@@ -437,13 +442,16 @@ exports.renderVerificationForm = async (req, res) => {
       </head>
       <body>
           <div class="container">
+              <div class="logo">
+                  <img src="https://wearelebanon.guide/WALLogo.png" alt="We Are Lebanon Logo">
+              </div>
               <h1>Set Your Password</h1>
               <p>Please enter your new password and confirm it below.</p>
               <form id="passwordForm">
                   <input type="hidden" id="token" name="token" value="${token}">
                   <input type="password" id="password" name="password" placeholder="New Password" required>
                   <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Confirm Password" required>
-                  <button type="submit">Verify Account</button>
+                  <button type="submit">Set Password</button>
               </form>
               <div id="message" class="message"></div>
           </div>
@@ -481,7 +489,7 @@ exports.renderVerificationForm = async (req, res) => {
                       const result = await response.json();
                       if (response.ok) {
                           messageDiv.className = 'message success';
-                          messageDiv.textContent = result.message || 'Account verified successfully!';
+                          messageDiv.textContent = result.message || 'Password set successfully!';
                       } else {
                           messageDiv.className = 'message error';
                           messageDiv.textContent = result.message || 'An error occurred. Please try again.';
@@ -504,6 +512,7 @@ exports.renderVerificationForm = async (req, res) => {
     res.status(500).send('<h3>Something went wrong</h3>');
   }
 };
+
 
 exports.requestOrganizerRole = async (req, res) => {
   try {
@@ -562,3 +571,47 @@ exports.requestOrganizerRole = async (req, res) => {
   }
 };
 
+// Change Password
+exports.changePassword = async (req, res) => {
+  const { user_id, oldPassword, newPassword } = req.body;
+
+  if (!user_id || !oldPassword || !newPassword) {
+    return res.status(400).json({ message: "All fields are required." });
+  }
+
+  // Check if the new password meets the minimum length requirement
+  if (newPassword.length < 8) {
+    return res.status(400).json({
+      message: "New password must be at least 8 characters long.",
+    });
+  }
+
+  try {
+    // Find the user by ID
+    const user = await User.findByPk(user_id);
+    if (!user) {
+      return res.status(404).json({ message: "User not found." });
+    }
+
+    // Verify the old password
+    const isPasswordMatch = await bcrypt.compare(oldPassword, user.password);
+    if (!isPasswordMatch) {
+      return res.status(401).json({ message: "Old password is incorrect." });
+    }
+
+    // Hash the new password
+    const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+
+    // Update the user's password
+    user.password = hashedNewPassword;
+    await user.save();
+
+    res.status(200).json({ message: "Password changed successfully." });
+  } catch (error) {
+    console.error("Error changing password:", error);
+    res.status(500).json({
+      message: "An error occurred while changing the password.",
+      error: error.message,
+    });
+  }
+};

@@ -34,6 +34,9 @@ module.exports = (app) => {
 
     // ** Approve **
     router.post("/auth/approve/:id",authenticate,checkPermission('auth-approve'), authController.approveUser);
+
+    // change password 
+    router.post("/auth/change-password", authenticate, authController.changePassword);
   
     app.use("/api", router);
   };

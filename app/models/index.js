@@ -36,6 +36,7 @@ db.ProductPurchase = require("./product_purchase.model")(sequelize, Sequelize);
 db.notification =require("./notification.model")(sequelize, Sequelize);
 db.News = require("./news.model")(sequelize, Sequelize);
 db.Advertisement = require("./advertisement.model")(sequelize, Sequelize);
+db.PasswordResetToken = require("./password_reset_token.model")(sequelize, Sequelize);
 
 // Define Relationships
 db.User.hasMany(db.Event, { foreignKey: "organizer_id", onDelete: "CASCADE" });
@@ -64,6 +65,10 @@ db.Coupon.belongsTo(db.Product, { foreignKey: "product_id" });
 
 db.User.hasMany(db.Coupon, { foreignKey: "user_id", onDelete: "CASCADE" });
 db.Coupon.belongsTo(db.User, { foreignKey: "user_id" });
+
+// User and PasswordResetToken (one-to-many)
+db.User.hasMany(db.PasswordResetToken, { foreignKey: "user_id", onDelete: "CASCADE" });
+db.PasswordResetToken.belongsTo(db.User, { foreignKey: "user_id" });
 
 // Advertisement and user role admin  (Many-to-one)
 db.Advertisement.belongsTo(db.User, { foreignKey: "admin_id", onDelete: "CASCADE" });

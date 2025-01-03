@@ -724,6 +724,40 @@ const advertisementValidationSchema = Joi.object({
       "array.base": "Images must be an array of valid URLs.",
     }),
 });
+// Input validation schema for forget password
+const forgetPasswordSchema = Joi.object({
+  email: Joi.string()
+    .email()
+    .required()
+    .messages({
+      "string.email": "Email must be a valid email address.",
+      "any.required": "Email is required.",
+    }),
+});
+
+// Input validation schema for reset password
+const resetPasswordSchema = Joi.object({
+  token: Joi.string()
+    .required()
+    .messages({
+      "string.base": "Token must be a string.",
+      "any.required": "Token is required.",
+    }),
+  password: Joi.string()
+    .min(8)
+    .required()
+    .messages({
+      "string.min": "Password must be at least 8 characters long.",
+      "any.required": "Password is required.",
+    }),
+  confirmPassword: Joi.string()
+    .valid(Joi.ref("password"))
+    .required()
+    .messages({
+      "any.only": "Confirm password must match the new password.",
+      "any.required": "Confirm password is required.",
+    }),
+});
 
 
   module.exports = {
@@ -750,5 +784,7 @@ const advertisementValidationSchema = Joi.object({
     cancelReservationSchema,
     createNotificationSchema ,
     newsValidationSchema,
-    advertisementValidationSchema
+    advertisementValidationSchema,
+    forgetPasswordSchema,
+    resetPasswordSchema,
 };
