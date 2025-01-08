@@ -9,6 +9,10 @@ module.exports = (sequelize, Sequelize) => {
         type: Sequelize.INTEGER,
         allowNull: false,
       },
+      customer_id: {
+        type: Sequelize.JSON,
+        allowNull: true,
+      },
       title: {
         type: Sequelize.STRING,
         allowNull: false,
@@ -33,7 +37,10 @@ module.exports = (sequelize, Sequelize) => {
         type: Sequelize.JSON,
         allowNull: true,
       },      
-    
+      ads_spend: {
+        type: Sequelize.DOUBLE,
+        allowNull: false,
+      },
     });
   
     return Advertisement;

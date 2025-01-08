@@ -42,7 +42,7 @@ exports.createBlog = async (req, res) => {
   }
 
   try {
-    const { user_id, event_id, title, content, tags, description, is_approved } = req.body;
+    const { user_id, event_id, title, content, description, is_approved } = req.body;
 
     // Check if the user exists
     const user = await User.findByPk(user_id);
@@ -69,7 +69,6 @@ exports.createBlog = async (req, res) => {
       event_id,
       title,
       content,
-      tags: tags ? JSON.parse(tags) : [],
       files,
       description,
       is_approved: approvalStatus,
@@ -106,7 +105,7 @@ exports.updateBlog = async (req, res) => {
     const blog = await Blog.findByPk(id);
     if (!blog) return res.status(404).json({ message: "Blog not found" });
 
-    const { title, content, tags, description ,is_approved,} = req.body;
+    const { title, content,  description ,is_approved,} = req.body;
 
     // Parse existing files if necessary
     let existingFiles = [];
@@ -137,7 +136,6 @@ exports.updateBlog = async (req, res) => {
     await blog.update({
       ...(title && { title }),
       ...(content && { content }),
-      ...(tags && { tags: JSON.parse(tags) }), // Replace tags array if provided
       ...(description && { description }),
       ...(is_approved && {is_approved}),
       files: updatedFiles, // Update the files array

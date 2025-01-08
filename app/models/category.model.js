@@ -16,11 +16,7 @@ module.exports = (sequelize, Sequelize) => {
         allowNull: true,
         trim: true,
       },
-      type: {
-        type: Sequelize.ENUM("product", "event", "blog"),
-        allowNull: false,
-        trim: true,
-      },
+    
     },{ timestamps: true });
   
     return Category;

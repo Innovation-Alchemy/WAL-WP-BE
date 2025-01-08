@@ -1,5 +1,6 @@
 const db = require("../models");
 const Product = db.Product;
+const Stock = db.Stock;
 const { createProductSchema } = require("../utils/validations");
 
 exports.getAllProducts = async (req, res) => {
@@ -31,85 +32,88 @@ exports.getProductById = async (req, res) => {
 
 exports.createProduct = async (req, res) => {
   try {
-    // Parse fields if they are strings
-    if (typeof req.body.price === "string") {
-      try {
-        req.body.price = JSON.parse(req.body.price);
-      } catch (error) {
-        return res.status(400).json({ message: "Price must be a valid JSON array or a single number." });
-      }
-    }
+    const { name, description, user_id, event_id, blog_id, commission, is_approved, price, stock_alert, size, color, quantities } = req.body;
 
-    if (typeof req.body.size === "string") {
-      try {
-        req.body.size = JSON.parse(req.body.size);
-      } catch (error) {
-        return res.status(400).json({ message: "Size must be a valid JSON array." });
-      }
-    }
-
-    if (typeof req.body.color === "string") {
-      try {
-        req.body.color = JSON.parse(req.body.color);
-      } catch (error) {
-        return res.status(400).json({ message: "Color must be a valid JSON array." });
-      }
-    }
-
-    // Validate price combinations
-    const { size, color, price } = req.body;
-    const expectedCombinations = size.length * color.length;
-
-    if (price.length !== expectedCombinations) {
-      return res.status(400).json({
-        message: `Price array length must match the total combinations of size (${size.length}) x color (${color.length}), which is ${expectedCombinations}.`,
-      });
+    // Parse and validate JSON fields
+    let parsedSize, parsedColor, parsedQuantities;
+    try {
+      parsedSize = JSON.parse(size);
+      parsedColor = JSON.parse(color);
+      parsedQuantities = JSON.parse(quantities);
+    } catch (error) {
+      return res.status(400).json({ message: "Size, color, and quantities must be valid JSON arrays." });
     }
 
     // Handle uploaded images
-    let image = [];
+    let imageAssociations = [];
     if (req.files && req.files.length > 0) {
-      image = req.files.map((file) =>
-        process.env.NODE_ENV === "production"
-          ? `https://yourdomain.com/${file.path.replace(/\\/g, "/")}`
-          : `http://localhost:8080/${file.path.replace(/\\/g, "/")}`
-      );
+      if (!parsedColor || parsedColor.length === 0) {
+        return res.status(400).json({ message: "Colors are required to associate images." });
+      }
+
+      if (req.files.length !== parsedColor.length) {
+        return res.status(400).json({ message: "Each color must have an associated image." });
+      }
+
+      imageAssociations = req.files.map((file, index) => ({
+        color: parsedColor[index],
+        image:
+          process.env.NODE_ENV === "production"
+            ? `https://yourdomain.com/${file.path.replace(/\\/g, "/")}`
+            : `http://localhost:8080/${file.path.replace(/\\/g, "/")}`,
+      }));
     }
 
-    const { name, description, user_id, commission, is_approved, stock_alert } = req.body;
+    // Add image associations to the request body for validation
+    req.body.image = imageAssociations;
 
-    // Validate the request body
-    const { error } = createProductSchema.validate(req.body);
+    // Validate input using the schema
+    const validationData = {
+      ...req.body,
+      price: Number(price), // Ensure price is a number
+      size: parsedSize, // Pass parsed size array
+      color: parsedColor, // Pass parsed color array
+      quantities: parsedQuantities, // Pass parsed quantities array
+    };
+
+    const { error } = createProductSchema.validate(validationData, { abortEarly: false });
     if (error) {
-      return res.status(400).json({ message: error.details[0].message });
+      return res.status(400).json({
+        message: "Validation failed",
+        errors: error.details.map((err) => err.message),
+      });
     }
-
-    // Determine is_approved value
-    const user = await db.User.findByPk(user_id);
-    if (!user) {
-      return res.status(404).json({ message: "User not found." });
-    }
-    const approvalStatus =
-      user.role === "Admin"
-        ? true // Admin-created products are automatically approved
-        : is_approved || false; // Use provided value if available; default to false
 
     // Create the product
     const newProduct = await Product.create({
-      user_id,
       name,
       description,
-      price,
-      size,
-      color,
-      commission: commission || 100.0, // Default to 100% commission if not provided
-      is_approved: approvalStatus,
-      stock_alert,
-      image, // Save image URLs in the database
+      user_id,
+      event_id,
+      blog_id,
+      commission: commission || 100.0,
+      is_approved: is_approved || false,
+      price: Number(price),
+      size: parsedSize,
+      color: parsedColor,
+      stock_alert: stock_alert || 10,
+      image: imageAssociations,
     });
 
+    // Add stock for each size-color combination from quantities
+    for (const { color: productColor, size: productSize, quantity } of parsedQuantities) {
+      await Stock.create({
+        product_id: newProduct.id,
+        color: productColor,
+        size: productSize,
+        quantity_in_stock: quantity,
+        quantity_unit: "pcs",
+        stock_alert: stock_alert || 10,
+      });
+    }
+
     res.status(201).json({
-      message: "Product created successfully",
+      message: "Product created successfully with associated stock and images.",
       data: newProduct,
     });
   } catch (error) {
@@ -121,88 +125,74 @@ exports.createProduct = async (req, res) => {
 exports.updateProduct = async (req, res) => {
   try {
     const product = await Product.findByPk(req.params.id);
-
     if (!product) {
-      return res.status(404).json({ message: "Product not found" });
+      return res.status(404).json({ message: "Product not found." });
     }
 
-    // Parse fields if they are strings
-    if (typeof req.body.price === "string") {
-      try {
-        req.body.price = JSON.parse(req.body.price);
-      } catch (error) {
-        return res.status(400).json({ message: "Price must be a valid JSON array or a single number." });
+    const { name, description, size, color, price, stock_alert, commission, is_approved, quantities } = req.body;
+
+    // Handle uploaded images
+    let imageAssociations = product.image || [];
+    if (req.files && req.files.length > 0) {
+      const colors = JSON.parse(color);
+      if (req.files.length !== colors.length) {
+        return res.status(400).json({ message: "Each color must have an associated image." });
       }
+
+      const newImages = req.files.map((file, index) => ({
+        color: colors[index],
+        image:
+          process.env.NODE_ENV === "production"
+            ? `https://yourdomain.com/${file.path.replace(/\\/g, "/")}`
+            : `http://localhost:8080/${file.path.replace(/\\/g, "/")}`,
+      }));
+      imageAssociations = [...imageAssociations, ...newImages];
     }
 
-    if (typeof req.body.size === "string") {
-      try {
-        req.body.size = JSON.parse(req.body.size);
-      } catch (error) {
-        return res.status(400).json({ message: "Size must be a valid JSON array." });
-      }
+    // Add image associations to the request body for validation
+    req.body.image = imageAssociations;
+
+    // Validate input
+    const { error } = createProductSchema.validate(req.body, { abortEarly: false });
+    if (error) {
+      return res.status(400).json({
+        message: "Validation failed",
+        errors: error.details.map((err) => err.message),
+      });
     }
 
-    if (typeof req.body.color === "string") {
-      try {
-        req.body.color = JSON.parse(req.body.color);
-      } catch (error) {
-        return res.status(400).json({ message: "Color must be a valid JSON array." });
-      }
-    }
+    // Update product details
+    await product.update({
+      name: name || product.name,
+      description: description || product.description,
+      size: JSON.parse(size) || product.size,
+      color: JSON.parse(color) || product.color,
+      price: JSON.parse(price) || product.price,
+      stock_alert: stock_alert || product.stock_alert,
+      commission: commission || product.commission,
+      is_approved: is_approved !== undefined ? is_approved : product.is_approved,
+      image: imageAssociations, // Update color-image mapping
+    });
 
-    const { name, description, price, size, color, commission, is_approved,stock_alert } = req.body;
+    // Update stock for new size-color combinations from quantities
+    if (quantities) {
+      await Stock.destroy({ where: { product_id: product.id } });
 
-    // Validate price combinations
-    if (size && color && price) {
-      const expectedCombinations = size.length * color.length;
-
-      if (price.length !== expectedCombinations) {
-        return res.status(400).json({
-          message: `Price array length must match the total combinations of size (${size.length}) x color (${color.length}), which is ${expectedCombinations}.`,
+      const parsedQuantities = JSON.parse(quantities);
+      for (const { color: productColor, size: productSize, quantity } of parsedQuantities) {
+        await Stock.create({
+          product_id: product.id,
+          color: productColor,
+          size: productSize,
+          quantity_in_stock: quantity,
+          quantity_unit: "pcs",
+          stock_alert: stock_alert || 10,
         });
       }
     }
 
-    // Handle uploaded images
-    let image = Array.isArray(product.image) ? product.image : []; // Ensure image is an array
-    if (req.files && req.files.length > 0) {
-      const newImages = req.files.map((file) =>
-        process.env.NODE_ENV === "production"
-          ? `https://yourdomain.com/${file.path.replace(/\\/g, "/")}`
-          : `http://localhost:8080/${file.path.replace(/\\/g, "/")}`
-      );
-      // Merge existing and new images
-      image = [...image, ...newImages];
-    }
-
-    // Determine is_approved value
-    const user = await db.User.findByPk(product.user_id);
-    if (!user) {
-      return res.status(404).json({ message: "User not found." });
-    }
-    const approvalStatus =
-      user.role === "Admin"
-        ? true // Admin-updated products are automatically approved
-        : is_approved !== undefined
-        ? is_approved
-        : product.is_approved; // Keep existing value if not explicitly provided
-
-    // Update the product
-    await product.update({
-      name: name !== undefined ? name : product.name,
-      description: description !== undefined ? description : product.description,
-      price: price !== undefined ? price : product.price,
-      size: size !== undefined ? size : product.size,
-      color: color !== undefined ? color : product.color,
-      commission: commission !== undefined ? commission : product.commission,
-      stock_alert: stock_alert!==undefined?stock_alert:product.stock_alert,
-      is_approved: approvalStatus,
-      image, // Save updated images
-    });
-
     res.status(200).json({
-      message: "Product updated successfully",
+      message: "Product updated successfully with updated stock and images.",
       data: product,
     });
   } catch (error) {
@@ -210,7 +200,6 @@ exports.updateProduct = async (req, res) => {
     res.status(500).json({ message: "Error updating product", error: error.message });
   }
 };
-
   
 exports.deleteProduct = async (req, res) => {
   try {

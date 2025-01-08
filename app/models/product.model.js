@@ -11,6 +11,14 @@ module.exports = (sequelize, Sequelize) => {
         type: Sequelize.INTEGER,
         allowNull: false,
       },
+      blog_id: {
+        type: Sequelize.INTEGER,
+        allowNull: true,
+      },
+      event_id: {
+        type: Sequelize.INTEGER,
+        allowNull: true,
+      },
       name: {
         type: Sequelize.STRING,
         allowNull: false,
@@ -20,14 +28,14 @@ module.exports = (sequelize, Sequelize) => {
         type: Sequelize.STRING,
         allowNull: true,
       },
+      price:  {
+        type: Sequelize.DOUBLE, 
+        allowNull: false,
+      },
       image: {
         type: Sequelize.JSON, 
         allowNull: true,
-      },
-      price:  {
-        type: Sequelize.JSON, 
-        allowNull: false,
-      },
+      },    
       size: {
         type: Sequelize.JSON, 
         allowNull: false,
@@ -46,29 +54,14 @@ module.exports = (sequelize, Sequelize) => {
         allowNull: false,
         defaultValue: false, // Default is not approved
       },
-      quantity_in_stock: {
-        type: Sequelize.INTEGER,
-        allowNull: false,
-        defaultValue: 10      
-      },
-      stock_alert: {
-        type: Sequelize.INTEGER,
-        allowNull: false,
-        defaultValue: 10  
+      categories: {
+        type: Sequelize.JSON, // Store as JSON
+        allowNull: true,
+        defaultValue: [], // Default to an empty array
       },
     },
     { timestamps: true }
   );
-
-  // Add a hook to trim whitespace before saving
-  Product.addHook("beforeSave", (product) => {
-    if (product.name) {
-      product.name = product.name.trim();
-    }
-    if (product.description) {
-      product.description = product.description.trim();
-    }
-  });
 
   return Product;
 };

@@ -80,14 +80,11 @@ exports.createEvent = async (req, res) => {
       return res.status(404).json({ message: "Organizer not found" });
     }
 
-    // Validate date_time logic
     if (!Array.isArray(date_time) || date_time.length === 0) {
       return res.status(400).json({
-        message: "Invalid date_time. At least a start_date is required.",
+        message: "Invalid date_time. At least one date is required.",
       });
     }
-    const start_date = date_time[0];
-    const end_date = date_time[1] || null;
 
     // Validate location contains lat and lng
     if (!location || !location.lat || !location.lng) {
@@ -177,16 +174,14 @@ exports.updateEvent = async (req, res) => {
     //Update status if provided
     if(status) updates.status= status;
 
-    // Validate and update date_time if provided
-    if (date_time) {
-      if (!Array.isArray(date_time) || date_time.length === 0) {
-        return res.status(400).json({ message: "Invalid date_time. At least a start_date is required." });
-      }
-      updates.date_time = {
-        start_date: date_time[0],
-        end_date: date_time[1] || null,
-      };
-    }
+   // Validate and update date_time if provided
+if (date_time) {
+  if (!Array.isArray(date_time) || date_time.length === 0) {
+    return res.status(400).json({ message: "Invalid date_time. At least one date is required." });
+  }
+  updates.date_time = date_time; // Directly store the array
+}
+
 
     // Validate and update location if provided
     if (location) {

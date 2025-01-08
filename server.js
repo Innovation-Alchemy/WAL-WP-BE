@@ -57,6 +57,17 @@ require("./app/routes/combined_data.routes")(app);
 require("./app/routes/news.routes")(app);
 require("./app/routes/advertisement.routes")(app);
 require("./app/routes/forget_password_token.routes")(app);
+require("./app/routes/report.routes")(app);
+require("./app/routes/tags.routes")(app);
+require("./app/routes/blog_tags.routes")(app);
+require("./app/routes/event_tags.routes")(app);
+require("./app/routes/product_tags.routes")(app);
+require("./app/routes/blog_reports.routes")(app);
+require("./app/routes/event_reports.routes")(app);
+require("./app/routes/product_reports.routes")(app);
+require("./app/routes/stock.routes")(app);
+require("./app/routes/cart.routes")(app);
+require("./app/routes/rating.routes")(app);
 require("./cron");
 
 // Start server

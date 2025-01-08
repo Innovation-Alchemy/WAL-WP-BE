@@ -37,6 +37,18 @@ db.notification =require("./notification.model")(sequelize, Sequelize);
 db.News = require("./news.model")(sequelize, Sequelize);
 db.Advertisement = require("./advertisement.model")(sequelize, Sequelize);
 db.PasswordResetToken = require("./password_reset_token.model")(sequelize, Sequelize);
+db.Report = require("./report.model")(sequelize, Sequelize);
+db.Tags = require("./tags.model")(sequelize, Sequelize);
+db.BlogTags = require("./blog_tags.model")(sequelize, Sequelize);
+db.EventTags = require("./event_tags.model")(sequelize, Sequelize);
+db.ProductTags = require("./product_tags.model")(sequelize, Sequelize);
+db.BlogReports = require("./blog_reports.model")(sequelize, Sequelize);
+db.EventReports = require("./event_reports.model")(sequelize, Sequelize);
+db.ProductReports = require("./product_reports.model")(sequelize, Sequelize);
+db.Stock = require("./stock.model")(sequelize, Sequelize);
+db.Cart = require("./cart.model")(sequelize, Sequelize);
+db.Rating = require("./ratings.model")(sequelize, Sequelize);
+
 
 // Define Relationships
 db.User.hasMany(db.Event, { foreignKey: "organizer_id", onDelete: "CASCADE" });
@@ -65,6 +77,61 @@ db.Coupon.belongsTo(db.Product, { foreignKey: "product_id" });
 
 db.User.hasMany(db.Coupon, { foreignKey: "user_id", onDelete: "CASCADE" });
 db.Coupon.belongsTo(db.User, { foreignKey: "user_id" });
+
+db.Product.hasMany(db.Rating, { foreignKey: "product_id", onDelete: "CASCADE" });
+db.Rating.belongsTo(db.Product, { foreignKey: "product_id" });
+
+db.User.hasMany(db.Rating, { foreignKey: "user_id", onDelete: "CASCADE" });
+db.Rating.belongsTo(db.User, { foreignKey: "user_id" });
+
+
+//User and Cart (one-to-many)
+db.User.hasMany(db.Cart, { foreignKey: "user_id", onDelete: "CASCADE" });
+db.Cart.belongsTo(db.User, { foreignKey: "user_id" });
+
+// Tags relationships for Blog, Event, Product
+db.Tags.belongsToMany(db.Blog, { through: "BlogTags", foreignKey: "tag_id", onDelete: "CASCADE" });
+db.Blog.belongsToMany(db.Tags, { through: "BlogTags", foreignKey: "blog_id", onDelete: "CASCADE" });
+
+db.Tags.belongsToMany(db.Event, { through: "EventTags", foreignKey: "tag_id", onDelete: "CASCADE" });
+db.Event.belongsToMany(db.Tags, { through: "EventTags", foreignKey: "event_id", onDelete: "CASCADE" });
+
+db.Tags.belongsToMany(db.Product, { through: "ProductTags", foreignKey: "tag_id", onDelete: "CASCADE" });
+db.Product.belongsToMany(db.Tags, { through: "ProductTags", foreignKey: "product_id", onDelete: "CASCADE" });
+
+// Report relationships for Blog, Event, Product
+db.Report.belongsToMany(db.Blog, { through: "BlogReports", foreignKey: "report_id", onDelete: "CASCADE" });
+db.Blog.belongsToMany(db.Report, { through: "BlogReports", foreignKey: "blog_id", onDelete: "CASCADE" });
+
+db.Report.belongsToMany(db.Event, { through: "EventReports", foreignKey: "report_id", onDelete: "CASCADE" });
+db.Event.belongsToMany(db.Report, { through: "EventReports", foreignKey: "event_id", onDelete: "CASCADE" });
+
+db.Report.belongsToMany(db.Product, { through: "ProductReports", foreignKey: "report_id", onDelete: "CASCADE" });
+db.Product.belongsToMany(db.Report, { through: "ProductReports", foreignKey: "product_id", onDelete: "CASCADE" });
+
+// User and Cart (one-to-many)
+db.User.hasMany(db.Cart, { foreignKey: "user_id", onDelete: "CASCADE" });
+db.Cart.belongsTo(db.User, { foreignKey: "user_id" });
+
+//Products and Stocks (one-to-many)
+db.Product.hasMany(db.Stock, { foreignKey: "product_id", onDelete: "CASCADE" });
+db.Stock.belongsTo(db.Product, { foreignKey: "product_id" });
+
+//Events and Products (one-to-many)
+db.Event.hasMany(db.Product, { foreignKey: "event_id", onDelete: "CASCADE" });
+db.Product.belongsTo(db.Event, { foreignKey: "event_id" });
+
+//Blogs and Products (one-to-many)
+db.Blog.hasMany(db.Product, { foreignKey: "blog_id", onDelete: "CASCADE" });
+db.Product.belongsTo(db.Blog, { foreignKey: "blog_id" });
+
+// Events and Categories (one-to-one)
+db.Event.hasOne(db.Category, { foreignKey: "categories", onDelete: "CASCADE" });
+db.Category.belongsTo(db.Event, { foreignKey: "categories" });
+
+// Products and Categories (one-to-one)
+db.Product.hasOne(db.Category, { foreignKey: "categories", onDelete: "CASCADE" });
+db.Category.belongsTo(db.Product, { foreignKey: "categories" });
 
 // User and PasswordResetToken (one-to-many)
 db.User.hasMany(db.PasswordResetToken, { foreignKey: "user_id", onDelete: "CASCADE" });

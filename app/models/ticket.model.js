@@ -31,7 +31,7 @@ module.exports = (sequelize, Sequelize) => {
     },
     total_seats: {
       type: Sequelize.JSON, // Array of {section, seats}
-      allowNull: false,
+      allowNull: true,// if event is not seated, this will be null
     },
     tickets_sold_count: {
       type: Sequelize.INTEGER,

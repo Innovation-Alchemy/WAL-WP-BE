@@ -30,35 +30,90 @@ exports.getAdminPanelData = async (req, res) => {
       limit: 10,
     });
 
-    // NOTIFICATIONS SECTION
-    const totalNotifications = await Notification.count();
-    const totalAlerts = await Notification.count({ where: { alerts: { [Op.ne]: null } } });
-    const notificationViews = {
-      organizerApproval: await Notification.count({ where: { notification_type: "organizer-approval" } }),
-      eventApproval: await Notification.count({ where: { notification_type: "event-approval" } }),
-      blogApproval: await Notification.count({ where: { notification_type: "blog-approval" } }),
+  // NOTIFICATIONS SECTION
+  const totalNotifications = await Notification.count();
+  const totalAlerts = await Notification.count({ where: { alerts: { [Op.ne]: null } } });
+
+  const notificationsWithDetails = await Notification.findAll({
+    include: [
+      {
+        model: Blog,
+        attributes: ["id", "title"], // Fetch Blog details
+      },
+      {
+        model: Event,
+        attributes: ["id", "title"], // Fetch Event details
+      },
+    ],
+    attributes: ["id", "notification_type", "alerts", "message", "is_read"],
+  });
+
+  const notificationsMapped = notificationsWithDetails.map((notification) => {
+    let relatedEntityType = null;
+    let relatedEntity = null;
+
+    if (notification.Blog) {
+      relatedEntityType = "Blog";
+      relatedEntity = {
+        id: notification.Blog.id,
+        title: notification.Blog.title,
+      };
+    } else if (notification.Event) {
+      relatedEntityType = "Event";
+      relatedEntity = {
+        id: notification.Event.id,
+        title: notification.Event.title,
+      };
+    }
+
+    return {
+      id: notification.id,
+      notification_type: notification.notification_type,
+      alerts: notification.alerts,
+      message: notification.message,
+      is_read: notification.is_read,
+      relatedEntityType, // Blog or Event
+      relatedEntity, // Entity details
     };
-    const alertsCounts = {
-      lowStock: await Notification.count({ where: { alerts: "low-stock" } }),
-      lowTickets: await Notification.count({ where: { alerts: "low-tickets" } }),
-      reportEvent: await Notification.count({ where: { alerts: "report-event" } }),
-      reportProduct: await Notification.count({ where: { alerts: "report-product" } }),
-      reportBlog: await Notification.count({ where: { alerts: "report-blog" } }),
-    };
+  });
+   // BLOGS SECTION
+   const totalBlogs = await Blog.count({ where: { is_approved: true } });
+   const totalViews = await db.views.count(); // Total blog views
+   const totalLikes = await db.likes.count(); // Total blog likes
+   const totalComments = await db.comments.count(); // Total blog comments
+   const totalInteractions = totalLikes + totalComments;
 
-    // BLOGS SECTION
-    const totalBlogs = await Blog.count({ where: { is_approved: true } });
-    const totalViews = await db.views.count(); // Total blog views
-    const totalLikes = await db.likes.count(); // Total blog likes
-    const totalComments = await db.comments.count(); // Total blog comments
-    const totalInteractions = totalLikes + totalComments;
+   const last10ApprovedBlogs = await Blog.findAll({
+     where: { is_approved: true },
+     order: [["createdAt", "DESC"]],
+     limit: 10,
+     include: [
+       {
+         model: db.views,
+         attributes: ["id"], // Fetch only necessary attributes
+       },
+       {
+         model: db.likes,
+         attributes: ["id"], // Fetch only necessary attributes
+       },
+       {
+         model: db.comments,
+         attributes: ["id"], // Fetch only necessary attributes
+       },
+     ],
+   });
 
-    const last10ApprovedBlogs = await Blog.findAll({
-      where: { is_approved: true },
-      order: [["createdAt", "DESC"]],
-      limit: 10,
-    });
-
+   const last10ApprovedBlogsMapped = last10ApprovedBlogs.map((blog) => ({
+     id: blog.id,
+     title: blog.title,
+     content: blog.content,
+     description: blog.description,
+     tags: blog.tags,
+     files: blog.files,
+     views: blog.views ? blog.views.length : 0, // Null-safe check
+     likes: blog.likes ? blog.likes.length : 0, // Null-safe check
+     comments: blog.comments ? blog.comments.length : 0, // Null-safe check
+   }));
     // Combine all data
     const adminPanelData = {
       counts: {
@@ -89,21 +144,13 @@ exports.getAdminPanelData = async (req, res) => {
       notifications: {
         totalNotifications,
         totalAlerts,
-        notificationViews,
-        alertsCounts,
+        notifications: notificationsMapped,
       },
       blogs: {
         totalBlogs,
         totalViews,
         totalInteractions,
-        last10ApprovedBlogs: last10ApprovedBlogs.map((blog) => ({
-          id: blog.id,
-          title: blog.title,
-          content: blog.content,
-          description: blog.description,
-          tags: blog.tags,
-          files: blog.files,
-        })),
+        last10ApprovedBlogs: last10ApprovedBlogsMapped,
       },
     };
 
@@ -116,3 +163,4 @@ exports.getAdminPanelData = async (req, res) => {
     });
   }
 };
+

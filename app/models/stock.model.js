@@ -1,6 +1,6 @@
 module.exports = (sequelize, Sequelize) => {
-  const ProductPurchase = sequelize.define(
-    "Product_Purchase",
+  const Stock = sequelize.define(
+    "Stock",
     {
       id: {
         type: Sequelize.INTEGER,
@@ -8,10 +8,6 @@ module.exports = (sequelize, Sequelize) => {
         primaryKey: true,
       },
       product_id: {
-        type: Sequelize.INTEGER,
-        allowNull: false,
-      },
-      user_id: {
         type: Sequelize.INTEGER,
         allowNull: false,
       },
@@ -23,30 +19,24 @@ module.exports = (sequelize, Sequelize) => {
         type: Sequelize.STRING,
         allowNull: false,
       },
-      price: {
-        type: Sequelize.DOUBLE,
-        allowNull: false,
-      },
-      quantity: {
-        type: Sequelize.INTEGER,
-        allowNull: false,
-      },
       quantity_unit: {
         type: Sequelize.STRING,
         allowNull: false,
         defaultValue: "pcs",
       },
-      total_price: {
-        type: Sequelize.DOUBLE,
+      quantity_in_stock: {
+        type: Sequelize.INTEGER,
         allowNull: false,
+        defaultValue: 10      
       },
-      status: {
-        type: Sequelize.ENUM("pending", "completed","canceled"),
-        defaultValue: "pending",
+      stock_alert: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        defaultValue: 10  
       },
     },
     { timestamps: true }
   );
 
-  return ProductPurchase;
+  return Stock;
 };

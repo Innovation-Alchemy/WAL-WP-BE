@@ -23,10 +23,6 @@ module.exports = (sequelize, Sequelize) => {
         type: Sequelize.TEXT,
         allowNull: false,
       },
-      tags: {
-        type: Sequelize.JSON, // Stores tags as an array
-        allowNull: true,
-      },
       files: {
         type: Sequelize.JSON, // Stores file paths as an array
         allowNull: true,

@@ -45,7 +45,7 @@ const AuthVAlSchema = Joi.object({
       'date.base': 'Birthdate must be a valid ISO date.',
     }),
   gender: Joi.string()
-    .valid('male', 'female')
+    .valid('Male', 'Female')
     .allow(null)
     .optional()
     .messages({
@@ -272,13 +272,15 @@ const createCategorySchema = Joi.object({
       'string.base': 'Description must be a string.',
       'string.max': 'Description cannot exceed 255 characters.',
     }),
-  type: Joi.string()
-    .valid('product', 'event', 'blog')
-    .required()
-    .messages({
-      'any.only': 'Type must be one of "product", "event", or "blog".',
-      'any.required': 'Type is required.',
-    }),
+ 
+});
+
+const assignCategorySchema = Joi.object({
+  categoryIds: Joi.array().items(Joi.number().integer()).required(),
+});
+
+const removeCategorySchema = Joi.object({
+  categoryIds: Joi.array().items(Joi.number().integer()).required(),
 });
 
 // Input Validation Create Coupon schema
@@ -376,30 +378,7 @@ const createBlogSchema = Joi.object({
     "string.min": "Content must have at least 10 characters.",
     "any.required": "Content is required.",
   }),
-  tags: Joi.alternatives()
-  .try(
-    Joi.array().items(Joi.string().min(1).max(50)),
-    Joi.string().custom((value, helpers) => {
-      try {
-        const parsed = JSON.parse(value);
-        if (!Array.isArray(parsed)) {
-          throw new Error();
-        }
-        parsed.forEach((tag) => {
-          if (typeof tag !== "string" || tag.length < 1 || tag.length > 50) {
-            throw new Error();
-          }
-        });
-        return parsed; // Return parsed value for further processing
-      } catch {
-        return helpers.error("array.base");
-      }
-    })
-  )
-  .optional()
-  .messages({
-    "array.base": "Tags must be an array of strings.",
-  }),
+
   description: Joi.string().max(500).optional().messages({
     "string.base": "Description must be a string.",
     "string.max": "Description must not exceed 500 characters.",
@@ -413,40 +392,59 @@ const setPasswordSchema = Joi.object({
   confirmPassword: Joi.string().valid(Joi.ref("password")).required(),
 });
 
-// input validation for creating a product
+// Validation schema for creating a product
 const createProductSchema = Joi.object({
   user_id: Joi.number().integer().required().messages({
     "number.base": "User ID must be a number.",
     "any.required": "User ID is required.",
   }),
+
+  event_id: Joi.number().integer().optional().messages({
+    "number.base": "Event ID must be a number.",
+  }),
+
+  blog_id: Joi.number().integer().optional().messages({
+    "number.base": "Blog ID must be a number.",
+  }),
+
   name: Joi.string().min(3).max(100).required().messages({
     "string.base": "Name must be a string.",
     "string.min": "Name must be at least 3 characters long.",
     "string.max": "Name cannot exceed 100 characters.",
     "any.required": "Name is required.",
   }),
+
   description: Joi.string().allow(null).max(255).messages({
     "string.base": "Description must be a string.",
     "string.max": "Description cannot exceed 255 characters.",
   }),
+
   image: Joi.array()
-    .items(Joi.string().uri().messages({
-      "string.uri": "Each image must be a valid URL.",
-    }))
-    .allow(null)
-    .messages({
-      "array.base": "Image must be an array of valid URLs.",
-    }),
-  price: Joi.array()
-    .items(Joi.number().min(0).required())
-    .min(1)
+    .items(
+      Joi.object({
+        color: Joi.string().min(1).required().messages({
+          "string.base": "Color must be a string.",
+          "string.min": "Color must be at least 1 character long.",
+          "any.required": "Color is required for each image.",
+        }),
+        image: Joi.string().uri().required().messages({
+          "string.uri": "Image must be a valid URL.",
+          "any.required": "Image URL is required.",
+        }),
+      })
+    )
     .required()
     .messages({
-      "array.base": "Price must be an array of numbers.",
-      "number.base": "Each price must be a number.",
-      "array.min": "At least one price is required.",
-      "any.required": "Price is required.",
+      "array.base": "Image must be an array of objects with color and image fields.",
+      "any.required": "Image array is required.",
     }),
+
+  price: Joi.number().min(0).required().messages({
+    "number.base": "Price must be a number.",
+    "number.min": "Price cannot be less than 0.",
+    "any.required": "Price is required.",
+  }),
+
   size: Joi.array()
     .items(Joi.string().min(1).required().messages({
       "string.base": "Size must be a string.",
@@ -460,6 +458,7 @@ const createProductSchema = Joi.object({
       "array.min": "At least one size is required.",
       "any.required": "Size is required.",
     }),
+
   color: Joi.array()
     .items(Joi.string().min(1).required().messages({
       "string.base": "Color must be a string.",
@@ -473,24 +472,51 @@ const createProductSchema = Joi.object({
       "array.min": "At least one color is required.",
       "any.required": "Color is required.",
     }),
+
   commission: Joi.number().min(0).max(100).optional().messages({
     "number.base": "Commission must be a number.",
     "number.min": "Commission cannot be less than 0%.",
     "number.max": "Commission cannot exceed 100%.",
   }),
+
   is_approved: Joi.boolean().optional().messages({
     "boolean.base": "Is approved must be a boolean value.",
   }),
+
   stock_alert: Joi.number().integer().min(1).required().messages({
     "number.base": "Stock alert must be a number.",
     "number.integer": "Stock alert must be an integer.",
     "number.min": "Stock alert must be at least 1.",
     "any.required": "Stock alert is required.",
   }),
+
+  quantities: Joi.array()
+    .items(
+      Joi.object({
+        color: Joi.string().required().messages({
+          "string.base": "Color must be a string.",
+          "any.required": "Color is required.",
+        }),
+        size: Joi.string().required().messages({
+          "string.base": "Size must be a string.",
+          "any.required": "Size is required.",
+        }),
+        quantity: Joi.number().integer().min(0).required().messages({
+          "number.base": "Quantity must be a number.",
+          "number.integer": "Quantity must be an integer.",
+          "number.min": "Quantity must be at least 0.",
+          "any.required": "Quantity is required.",
+        }),
+      })
+    )
+    .required()
+    .messages({
+      "array.base": "Quantities must be an array of objects.",
+      "any.required": "Quantities are required.",
+    }),
 });
 
 
-// input validation for creating an event
 const createEventSchema = Joi.object({
   organizer_id: Joi.number().integer().required().messages({
     "number.base": "Organizer ID must be an integer.",
@@ -520,9 +546,9 @@ const createEventSchema = Joi.object({
       "number.base": "Longitude must be a number.",
       "any.required": "Longitude is required.",
     }),
-    address: Joi.string().required().messages({
+    address: Joi.string().optional().messages({
       "string.base": "Address must be a string.",
-      "any.required": "Address is required.",
+      
     }),
   }).required().messages({
     "object.base": "Location must be an object with lat, lng, and address.",
@@ -548,10 +574,11 @@ const createEventSchema = Joi.object({
   is_approved: Joi.boolean().optional().messages({
     "boolean.base": "Is approved must be a boolean value.",
   }),
-  ticket_alert:Joi.number().optional().messages({
-    "number.base": "ticket alert must be a number.",
+  ticket_alert: Joi.number().optional().messages({
+    "number.base": "Ticket alert must be a number.",
   }),
 });
+
 
 // input validation for creating tickets
 const createTicketsSchema = Joi.object({
@@ -787,4 +814,6 @@ const resetPasswordSchema = Joi.object({
     advertisementValidationSchema,
     forgetPasswordSchema,
     resetPasswordSchema,
+    assignCategorySchema,
+    removeCategorySchema,
 };

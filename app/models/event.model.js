@@ -11,6 +11,11 @@ module.exports = (sequelize, Sequelize) => {
         type: Sequelize.INTEGER,
         allowNull: false,
       },
+      categories: {
+        type: Sequelize.JSON, // Store as JSON
+        allowNull: true,
+        defaultValue: [], // Default to an empty array
+      },
       title: {
         type: Sequelize.STRING,
         allowNull: false,
@@ -30,7 +35,7 @@ module.exports = (sequelize, Sequelize) => {
       seated: {
         type: Sequelize.BOOLEAN,
         allowNull: false,
-        defaultValue: false,
+        defaultValue: true,
       },
       ticket_maps: {
         type: Sequelize.STRING,
