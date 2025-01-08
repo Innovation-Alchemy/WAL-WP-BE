@@ -2,7 +2,7 @@ const db = require("../models");
 const { Op } = require("sequelize");
 const Event = db.Event;
 const Tickets = db.Ticket;
-const TicketsSold = db.TicketsSold;
+const Stock = db.Stock;
 const Notification = db.notification;
 const Products = db.Product;
 const ProductPurchase = db.ProductPurchase;
@@ -22,13 +22,13 @@ exports.getAdminPanelData = async (req, res) => {
     });
 
     // STORE SECTION
-    const totalMerch = await Products.count();
+    /*const totalMerch = await Products.count();
     const merchRevenue = await ProductPurchase.sum("total_price") || 0; // Revenue from completed purchases
     const merchSold = await ProductPurchase.sum("quantity") || 0; // Total quantity sold
     const top10SoldProducts = await Products.findAll({
       order: [["quantity_in_stock", "ASC"]],
       limit: 10,
-    });
+    });*/
 
   // NOTIFICATIONS SECTION
   const totalNotifications = await Notification.count();
@@ -130,7 +130,7 @@ exports.getAdminPanelData = async (req, res) => {
           total_revenue: event.total_revenue,
         })),
       },
-      store: {
+      /*store: {
         totalMerch,
         merchRevenue,
         merchSold,
@@ -140,7 +140,7 @@ exports.getAdminPanelData = async (req, res) => {
           quantity_in_stock: product.quantity_in_stock,
           price: product.price,
         })),
-      },
+      },*/
       notifications: {
         totalNotifications,
         totalAlerts,

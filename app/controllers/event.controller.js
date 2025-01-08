@@ -52,13 +52,23 @@ exports.getEventsByUserId = async (req, res) => {
 };
 // Create a new event
 exports.createEvent = async (req, res) => {
-  const { error } = createEventSchema.validate(req.body);
-
-  // Return validation error if any
-  if (error) {
-    return res.status(400).json({ message: error.details[0].message });
+  
+// If date_time is a string, parse it into an actual array/object
+if (req.body.date_time && typeof req.body.date_time === "string") {
+  try {
+    req.body.date_time = JSON.parse(req.body.date_time);
+  } catch (err) {
+    return res.status(400).json({
+      message: "Invalid JSON format for date_time field.",
+    });
   }
+}
 
+// Now run Joi validation
+const { error } = createEventSchema.validate(req.body);
+if (error) {
+  return res.status(400).json({ message: error.details[0].message });
+}
   try {
     const {
       organizer_id,
@@ -70,7 +80,6 @@ exports.createEvent = async (req, res) => {
       ticket_maps,
       commission,
       is_approved,
-      ticket_alert,
       status
     } = req.body;
 
@@ -117,13 +126,12 @@ exports.createEvent = async (req, res) => {
       organizer_id,
       title,
       description,
-      date_time: { start_date, end_date },
+      date_time,
       location,
       seated,
       ticket_maps: ticketMapPath,
       commission: eventCommission,
       is_approved: approvalStatus,
-      ticket_alert,
       status: status || "pending",
     });
 

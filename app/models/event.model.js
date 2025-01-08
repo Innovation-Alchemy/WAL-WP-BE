@@ -51,10 +51,7 @@ module.exports = (sequelize, Sequelize) => {
         allowNull: false,
         defaultValue: false, // Default is not approved
       },
-      ticket_alert: {
-        type: Sequelize.INTEGER,
-        allowNull: false,
-      },
+      
       status: {
         type: Sequelize.ENUM("pending", "in-progress", "canceled","done"),
         defaultValue: "pending",

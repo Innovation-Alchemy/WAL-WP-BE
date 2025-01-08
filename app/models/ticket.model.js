@@ -41,6 +41,11 @@ module.exports = (sequelize, Sequelize) => {
       type: Sequelize.DECIMAL(10, 2),
       allowNull: true,
     },
+    ticket_alert: {
+      type: Sequelize.INTEGER,
+      allowNull: false,
+      defaultValue: 10, // Default to 10
+    },
   });
 
   return Tickets;

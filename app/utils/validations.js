@@ -516,7 +516,7 @@ const createProductSchema = Joi.object({
     }),
 });
 
-
+// input validation for creating events
 const createEventSchema = Joi.object({
   organizer_id: Joi.number().integer().required().messages({
     "number.base": "Organizer ID must be an integer.",
@@ -532,11 +532,21 @@ const createEventSchema = Joi.object({
     "string.base": "Description must be a string.",
     "any.required": "Description is required.",
   }),
-  date_time: Joi.array().items(Joi.date().iso().required()).min(1).required().messages({
-    "array.base": "Date and time must be an array of valid ISO dates.",
+  date_time: Joi.array()
+  .items(
+    Joi.string().isoDate().required().messages({
+      "string.isoDate": "Each date and time must be in a valid ISO 8601 format.",
+      "any.required": "Each date and time is required.",
+    })
+  )
+  .min(1)
+  .required()
+  .messages({
+    "array.base": "Date and time must be provided as an array.",
     "array.min": "At least one date and time must be provided.",
     "any.required": "Date and time are required.",
-  }),
+  })
+,
   location: Joi.object({
     lat: Joi.number().required().messages({
       "number.base": "Latitude must be a number.",
@@ -574,11 +584,8 @@ const createEventSchema = Joi.object({
   is_approved: Joi.boolean().optional().messages({
     "boolean.base": "Is approved must be a boolean value.",
   }),
-  ticket_alert: Joi.number().optional().messages({
-    "number.base": "Ticket alert must be a number.",
-  }),
+ 
 });
-
 
 // input validation for creating tickets
 const createTicketsSchema = Joi.object({
@@ -598,6 +605,8 @@ const createTicketsSchema = Joi.object({
       Joi.object({
         color: Joi.string().required(),
         section: Joi.array().items(Joi.string()).required(),
+        // quantity is optional, but if provided, must be a positive integer
+      quantity: Joi.number().integer().min(1).optional(),
       })
     )
     .required(),
@@ -608,17 +617,22 @@ const createTicketsSchema = Joi.object({
         seats: Joi.number().integer().required(),
       })
     )
-    .required(),
+    .optional(),
+    issued_at: Joi.date().optional(),
+    
+    ticket_alert: Joi.number().optional().messages({
+      "number.base": "Ticket alert must be a number.",
+    }),
 });
 
 // input validation for reserving 
 const reserveTicketSchema = Joi.object({
   ticket_id: Joi.number().integer().required(),
   buyer_id: Joi.number().integer().required(),
-  section: Joi.string().required(),
+  section: Joi.string().optional(),
   color: Joi.string().required(),
   amount: Joi.number().integer().min(1).required(), // Number of tickets to reserve
-  seat_number: Joi.array().items(Joi.string()).min(1).required(), // List of seat numbers
+  seat_number: Joi.array().items(Joi.string()).min(1).optional(), // List of seat numbers
 });
 
 // input validation for confirming

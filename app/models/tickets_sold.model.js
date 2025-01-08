@@ -15,11 +15,11 @@ module.exports = (sequelize, Sequelize) => {
     },
     section: {
       type: Sequelize.STRING,
-      allowNull: false,
+      allowNull: true,
     },
     seat: {
       type: Sequelize.INTEGER,
-      allowNull: false,
+      allowNull: true,
     },
     color: {
       type: Sequelize.STRING,

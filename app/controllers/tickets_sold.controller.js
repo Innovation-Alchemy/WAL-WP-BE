@@ -1,11 +1,13 @@
 const db = require("../models");
+const { Op } = db.Sequelize;
 const TicketsSold = db.TicketsSold;
 const Tickets = db.Ticket;
 const User = db.User;
 const Event = db.Event;
 const QRCode = require("qrcode");
 const crypto = require("crypto");
-
+const {generateTicketsPDF} = require("../utils/generate-pdf");
+const transporter = require("../config/email.config");
 // Get tickets sold by Buyer ID
 exports.getTicketsSoldByBuyerId = async (req, res) => {
   const { buyer_id } = req.params;
@@ -44,135 +46,324 @@ exports.getTicketsSoldByBuyerId = async (req, res) => {
     res.status(500).json({ message: "Error retrieving tickets sold by buyer ID", error: error.message });
   }
 };
-
 // Reserve Tickets
 exports.reserveTickets = async (req, res) => {
   try {
-    const { ticket_id, buyer_id, reservations } = req.body; // Reservations is an array of selected seats
-    const ticket = await Tickets.findByPk(ticket_id);
+    const { ticket_id, buyer_id, reservations } = req.body;
+
+    // 1. Fetch the ticket record (and include the associated event to see if it's seated)
+    const ticket = await Tickets.findByPk(ticket_id, {
+      include: [
+        {
+          model: Event,
+          attributes: ["id", "seated", "title"], // or any fields you need
+        },
+      ],
+    });
 
     if (!ticket) {
       return res.status(404).json({ message: "Ticket not found" });
     }
 
+    // 2. Validate the user (buyer)
     const user = await User.findByPk(buyer_id);
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // Parse `section`, `price`, and `total_seats` fields to ensure they are arrays
-    let ticketSections;
+    // 3. Validate the event
+    const event = ticket.Event;
+    if (!event) {
+      return res.status(404).json({ message: "Event not found" });
+    }
+
+    // 4. Parse the ticket prices (JSON)
     let ticketPrices;
-    let totalSeatsConfig;
     try {
-      ticketSections = JSON.parse(ticket.section);
       ticketPrices = JSON.parse(ticket.price);
-      totalSeatsConfig = JSON.parse(ticket.total_seats);
     } catch (error) {
-      return res.status(500).json({
-        message: "Error parsing ticket sections, prices, or total seats. Ensure they are stored as valid JSON.",
+      return res
+        .status(500)
+        .json({ message: "Error parsing ticket prices. Ensure they're valid JSON." });
+    }
+
+    // 5. Check if it's seated or non-seated
+    if (event.seated) {
+      // -------------------------------------------------------------------
+      // SEATED EVENT LOGIC
+      // -------------------------------------------------------------------
+
+      // We expect reservations: [ { section, seat, color }, ... ]
+      // e.g. { section: "A", seat: 10, color: "blue" }
+
+      // Validate the fields needed for a seated event
+      let ticketSections;
+      let totalSeatsConfig;
+      try {
+        ticketSections = JSON.parse(ticket.section);      // e.g. [ { color, section: ["A","B"] }, ... ]
+        totalSeatsConfig = JSON.parse(ticket.total_seats); // e.g. [ { section:"A", seats:50 }, ... ]
+      } catch (err) {
+        return res.status(500).json({
+          message:
+            "Error parsing ticket.section or ticket.total_seats. Ensure they're valid JSON for a seated event.",
+        });
+      }
+
+      // Fetch existing (reserved/sold) seats
+      const existingReservations = await TicketsSold.findAll({
+        where: {
+          ticket_id,
+          status: { [Op.in]: ["reserved", "sold"] },
+        },
+      });
+
+      const reservedSeats = existingReservations.map((r) => ({
+        section: r.section,
+        seat: r.seat,
+      }));
+
+      let total_price = 0;
+
+      // Validate each seat reservation
+      for (const reservation of reservations) {
+        let { section, seat, color } = reservation;
+
+        // Ensure section & color are strings
+        if (typeof section !== "string" || typeof color !== "string") {
+          return res.status(400).json({
+            message: "Section and color must be strings for a seated event.",
+          });
+        }
+
+        // Ensure seat is numeric
+        seat = parseInt(seat, 10);
+        if (isNaN(seat)) {
+          return res.status(400).json({
+            message: `Invalid seat number for section ${section}.`,
+          });
+        }
+
+        // Validate (section + color) in ticketSections
+        const sectionData = ticketSections.find(
+          (s) => s.color === color && s.section.includes(section)
+        );
+        if (!sectionData) {
+          return res.status(400).json({
+            message: `Invalid section or color. Section "${section}" with color "${color}" does not exist in this ticket.`,
+          });
+        }
+
+        // Validate seat range
+        const totalSeatsForSection = totalSeatsConfig.find(
+          (s) => s.section === section
+        );
+        if (!totalSeatsForSection || seat < 1 || seat > totalSeatsForSection.seats) {
+          return res.status(400).json({
+            message: `Seat number ${seat} is not valid for section ${section}. Valid range is 1 - ${totalSeatsForSection?.seats}.`,
+          });
+        }
+
+        // Check if seat is already reserved
+        const isSeatReserved = reservedSeats.some(
+          (r) => r.section === section && r.seat === seat
+        );
+        if (isSeatReserved) {
+          return res.status(400).json({
+            message: `Seat ${section}:${seat} (color: ${color}) is already reserved or sold.`,
+          });
+        }
+
+        // Find price for the color
+        const priceData = ticketPrices.find((p) => p.color === color);
+        if (!priceData) {
+          return res
+            .status(400)
+            .json({ message: `No price available for color "${color}".` });
+        }
+
+        total_price += parseFloat(priceData.price);
+      }
+
+      // Create seated reservations
+      const createdReservations = await Promise.all(
+        reservations.map(async (res) => {
+          const { section, seat, color } = res;
+          const priceItem = ticketPrices.find((p) => p.color === color);
+          return TicketsSold.create({
+            ticket_id,
+            buyer_id,
+            section: String(section),
+            seat: parseInt(seat, 10),
+            color: String(color),
+            price: parseFloat(priceItem.price),
+            status: "reserved",
+          });
+        })
+      );
+
+      return res.status(201).json({
+        message: "Tickets reserved successfully (seated event)",
+        data: createdReservations,
+        total_price,
+      });
+
+    } else {
+      // -------------------------------------------------------------------
+      // NON-SEATED EVENT LOGIC
+      // -------------------------------------------------------------------
+      // reservations: [{ color:"VIP", quantity:3, section?:"Zone-A" }, ...]
+
+      if (!Array.isArray(reservations) || reservations.length === 0) {
+        return res.status(400).json({
+          message: "Reservations must be a non-empty array (non-seated).",
+        });
+      }
+
+      // 1) Parse the "section" array from the Ticket to check quantity limits
+      //    e.g. ticket.section = [
+      //      { color:"VIP", section:["Zone-A"], quantity:100 },
+      //      { color:"GA",  section:["Zone-B"], quantity:200 }
+      //    ]
+      let nonSeatedSections;
+      try {
+        nonSeatedSections = JSON.parse(ticket.section); // array of { color, section[], quantity }
+      } catch (err) {
+        return res.status(500).json({
+          message: "Error parsing ticket.section for non-seated event.",
+        });
+      }
+      if (!Array.isArray(nonSeatedSections)) {
+        return res.status(500).json({
+          message: "Non-seated ticket.section must be an array with quantity fields.",
+        });
+      }
+
+      // 2) Count how many are already reserved/sold in each color
+      // We'll build a map from color -> how many are already used
+      // If user used "section" in the ticket, we can do color+section logic,
+      // but typically we just track total quantity per color, not per sub-section.
+      // If you want to track sub-sections individually, you'd store them all individually.
+      //
+      // For simplicity: We'll track total used per {color} if your design lumps them together
+      // or you could do color+zone if each item has a different zone-based limit.
+      
+      // First, get all existing tickets sold for this ticket_id
+      const existingNonSeated = await TicketsSold.findAll({
+        where: {
+          ticket_id,
+          status: { [Op.in]: ["reserved", "sold"] },
+        },
+      });
+
+      // Build a color-based usage map
+      // If you want per-(color+section) usage, adjust to incorporate section name too
+      const usedMap = {}; // e.g. { "VIP": 30, "GA":50 }
+      for (const sold of existingNonSeated) {
+        const c = sold.color;
+        usedMap[c] = (usedMap[c] || 0) + 1;
+      }
+
+      // Now let's create a quick map from color -> maxQuantity
+      const colorLimitMap = {}; // e.g. { "VIP": 100, "GA": 200 }
+      for (const secObj of nonSeatedSections) {
+        const c = secObj.color;
+        // If you want color+zone, you'd do something else
+        if (secObj.quantity === undefined || secObj.quantity <= 0) {
+          return res.status(500).json({
+            message: `Non-seated ticket data invalid. 'quantity' must be positive for color='${c}'.`,
+          });
+        }
+        // If multiple objects share the same color, you'd sum them or handle them individually
+        // Adjust logic if you want color+zone-based limits
+        if (colorLimitMap[c] === undefined) {
+          colorLimitMap[c] = secObj.quantity;
+        } else {
+          // Potentially sum them if you have multiple zone definitions with same color
+          colorLimitMap[c] += secObj.quantity;
+        }
+      }
+
+      let total_price = 0;
+      const createdReservations = [];
+
+      // 3) Validate each requested color's availability
+      for (const item of reservations) {
+        const { color, quantity, section } = item;
+        if (!color || !quantity) {
+          return res.status(400).json({
+            message: "Each reservation must have a color and quantity (non-seated).",
+          });
+        }
+
+        // Find the price
+        const priceObj = ticketPrices.find((p) => p.color === color);
+        if (!priceObj) {
+          return res
+            .status(400)
+            .json({ message: `No price found for color '${color}'.` });
+        }
+
+        // Check if colorLimitMap has a limit for this color
+        const limit = colorLimitMap[color];
+        if (!limit) {
+          return res.status(400).json({
+            message: `No limit found for color '${color}' in ticket.section data.`,
+          });
+        }
+
+        // Calculate how many are already used
+        const usedCount = usedMap[color] || 0;
+        const available = limit - usedCount;
+
+        if (quantity > available) {
+          return res.status(400).json({
+            message: `Not enough tickets for color='${color}'. Requested=${quantity}, Available=${available}.`,
+          });
+        }
+
+        // If pass, proceed to create that many reservations
+        for (let i = 0; i < quantity; i++) {
+          const newRes = await TicketsSold.create({
+            ticket_id,
+            buyer_id,
+            // optional 'section' if user wants zone
+            section: section ? String(section) : null,
+            seat: null,
+            color,
+            price: parseFloat(priceObj.price),
+            status: "reserved",
+          });
+          createdReservations.push(newRes);
+        }
+
+        // Update usedMap after successful creation
+        usedMap[color] = usedCount + quantity;
+
+        // Add to total price
+        total_price += parseFloat(priceObj.price) * quantity;
+      }
+
+      return res.status(201).json({
+        message: "Tickets reserved successfully (non-seated event)",
+        data: createdReservations,
+        total_price,
       });
     }
-
-    // Fetch all tickets sold for this ticket ID
-    const existingReservations = await TicketsSold.findAll({
-      where: {
-        ticket_id,
-        status: {
-          [db.Sequelize.Op.in]: ["reserved", "sold"], // Exclude `pending` and `canceled` statuses
-        },
-      },
-    });
-
-    const reservedSeats = existingReservations.map((res) => ({
-      section: res.section,
-      seat: res.seat,
-    }));
-
-    let total_price = 0;
-
-    // Validate and calculate price for each reservation
-    for (const reservation of reservations) {
-      let { section, seat, color } = reservation;
-
-      // Ensure section and color are strings
-      if (typeof section !== "string" || typeof color !== "string") {
-        return res.status(400).json({
-          message: "Section and color must be strings.",
-        });
-      }
-
-      // Ensure seat is a number
-      seat = parseInt(seat, 10);
-      if (isNaN(seat)) {
-        return res.status(400).json({
-          message: `Invalid seat number for section ${section}.`,
-        });
-      }
-
-      // Validate section exists in ticket
-      const sectionData = ticketSections.find((s) => s.color === color && s.section.includes(section));
-      if (!sectionData) {
-        return res.status(400).json({
-          message: `Invalid section or color. Section ${section} with color ${color} does not exist.`,
-        });
-      }
-
-      // Validate seat number is within range for the section
-      const totalSeatsForSection = totalSeatsConfig.find((s) => s.section === section);
-      if (!totalSeatsForSection || seat < 1 || seat > totalSeatsForSection.seats) {
-        return res.status(400).json({
-          message: `Seat number ${seat} is not valid for section ${section}.`,
-        });
-      }
-
-      // Check if the seat is already reserved or sold
-      const seatKey = `${section}:${seat}`;
-      const isSeatReserved = reservedSeats.some((s) => s.section === section && s.seat === seat);
-      if (isSeatReserved) {
-        return res.status(400).json({ message: `Seat ${seatKey} is already reserved or sold.` });
-      }
-
-      // Get price for the selected color
-      const priceData = ticketPrices.find((p) => p.color === color);
-      if (!priceData) {
-        return res.status(400).json({ message: `No price available for color ${color}.` });
-      }
-
-      // Add price to total
-      total_price += priceData.price;
-    }
-
-    // Create reservations
-    const reservationsData = reservations.map((res) => ({
-      ticket_id,
-      buyer_id,
-      section: String(res.section),
-      seat: parseInt(res.seat, 10),
-      color: String(res.color),
-      price: ticketPrices.find((p) => p.color === res.color).price,
-      status: "reserved", // Set the status to reserved
-    }));
-
-    const createdReservations = await TicketsSold.bulkCreate(reservationsData);
-
-    res.status(201).json({
-      message: "Tickets reserved successfully",
-      data: createdReservations,
-      total_price,
-    });
   } catch (error) {
     console.error("Error reserving tickets:", error);
-    res.status(500).json({ message: "Error reserving tickets", error: error.message });
+    return res.status(500).json({
+      message: "Error reserving tickets",
+      error: error.message,
+    });
   }
 };
-
+// Confirm selling multiple tickets
 // Confirm selling multiple tickets
 exports.confirmPurchases = async (req, res) => {
   try {
     const { ticket_sold_ids, buyer_id } = req.body;
 
-    // Find all reserved tickets by IDs
+    // 1. Find all reserved tickets by IDs
     const ticketsSold = await TicketsSold.findAll({
       where: { id: ticket_sold_ids },
       include: [
@@ -184,21 +375,23 @@ exports.confirmPurchases = async (req, res) => {
             "amount_issued",
             "tickets_sold_count",
             "tickets_sold_count_sum_price",
+            "price",
+            "ticket_alert", // <-- now from Tickets table
           ],
           include: {
             model: db.Event,
             attributes: [
               "id",
               "title",
-              "ticket_alert",
               "commission",
               "total_revenue",
-            ], // Include event details
+              "seated",
+            ],
           },
         },
         {
           model: User,
-          attributes: ["id", "name"], // Include buyer's name
+          attributes: ["id", "name", "email"], // buyer's email
         },
       ],
     });
@@ -207,10 +400,8 @@ exports.confirmPurchases = async (req, res) => {
       return res.status(404).json({ message: "Reserved tickets not found." });
     }
 
-    // Verify all tickets belong to the buyer
-    const unauthorizedTickets = ticketsSold.filter(
-      (ticket) => ticket.buyer_id !== buyer_id
-    );
+    // 2. Ensure all tickets belong to the same buyer
+    const unauthorizedTickets = ticketsSold.filter((ts) => ts.buyer_id !== buyer_id);
     if (unauthorizedTickets.length > 0) {
       return res.status(403).json({
         message: "You are not authorized to confirm these purchases.",
@@ -218,8 +409,8 @@ exports.confirmPurchases = async (req, res) => {
       });
     }
 
-    // Check for already sold tickets
-    const alreadySold = ticketsSold.filter((ticket) => ticket.status === "sold");
+    // 3. Check if any are already sold
+    const alreadySold = ticketsSold.filter((ts) => ts.status === "sold");
     if (alreadySold.length > 0) {
       return res.status(400).json({
         message: "Some tickets have already been sold.",
@@ -227,33 +418,27 @@ exports.confirmPurchases = async (req, res) => {
       });
     }
 
-    const ticketUpdates = {}; // Object to store cumulative updates for each ticket_id
+    // We'll keep track of how many tickets to update in each Tickets record
+    const ticketUpdates = {};
 
+    // 4. Process each ticketSold -> Mark as sold, generate QR, send separate email
     for (const ticketSold of ticketsSold) {
       const { Ticket } = ticketSold;
       const { Event } = Ticket;
 
-      // ------------------------------------------
-      // Only the QR code logic below is changed:
-      // ------------------------------------------
-
-      // Generate a random token instead of embedding all details
+      // (A) Generate a random token
       const randomToken = crypto.randomBytes(16).toString("hex");
 
-      // Create the DataURL-based QR code from the token
+      // (B) Generate the QR code in dataURL format
       const qrCode = await QRCode.toDataURL(randomToken);
 
-      // Update the ticket sold record
+      // (C) Mark ticket as sold
       ticketSold.status = "sold";
-      ticketSold.qr_code = qrCode; // You store the DataURL here
-      ticketSold.qr_code_token = randomToken; // Store the token as well
+      ticketSold.qr_code = qrCode;
+      ticketSold.qr_code_token = randomToken;
       await ticketSold.save();
 
-      // ------------------------------------------
-      // Everything else remains unchanged
-      // ------------------------------------------
-
-      // Collect updates for tickets table
+      // (D) Collect updates for the Tickets table
       if (!ticketUpdates[ticketSold.ticket_id]) {
         ticketUpdates[ticketSold.ticket_id] = {
           soldCount: 0,
@@ -261,19 +446,17 @@ exports.confirmPurchases = async (req, res) => {
           eventId: Ticket.event_id,
         };
       }
-
       ticketUpdates[ticketSold.ticket_id].soldCount += 1;
-      ticketUpdates[ticketSold.ticket_id].soldSumPrice += parseFloat(
-        ticketSold.price
-      );
+      ticketUpdates[ticketSold.ticket_id].soldSumPrice += parseFloat(ticketSold.price);
 
-      // Check ticket stock and notify admin if necessary
+      // (E) Check stock alert from ticket.ticket_alert (not from event)
       const ticketsSoldCount = await TicketsSold.count({
         where: { ticket_id: Ticket.id, status: "sold" },
       });
       const remainingTickets = Ticket.amount_issued - ticketsSoldCount;
 
-      if (remainingTickets <= Event.ticket_alert) {
+      if (remainingTickets <= Ticket.ticket_alert) {
+        // Notify Admins
         const admins = await User.findAll({ where: { role: "Admin" } });
         const notifications = admins.map((admin) => ({
           user_id: admin.id,
@@ -282,41 +465,61 @@ exports.confirmPurchases = async (req, res) => {
           message: `Tickets for event "${Event.title}" are running low. Remaining tickets: ${remainingTickets}`,
           is_read: false,
         }));
-
         await db.notification.bulkCreate(notifications);
+      }
+
+      // (F) Send a **separate email** for this one ticket
+      try {
+        // Optionally create a single-ticket PDF — or even embed the QR code directly in the email.
+        // For demonstration, let's create a minimal PDF that includes only this single ticket.
+        const singleTicketPDF = await generateTicketsPDF([ticketSold]); 
+        // generateTicketsPDF can accept an array; we pass an array of length 1
+
+        await transporter.sendMail({
+          from: process.env.EMAIL_USER,
+          to: ticketSold.User.email, // buyer email
+          subject: `Your Ticket #${ticketSold.id} - ${Event.title}`,
+          text: `Hello ${ticketSold.User.name}, here is your QR code for ticket #${ticketSold.id}.`,
+          attachments: [
+            {
+              filename: `ticket-${ticketSold.id}.pdf`,
+              content: singleTicketPDF,
+            },
+          ],
+        });
+      } catch (emailErr) {
+        console.error("Error sending separate ticket email:", emailErr);
       }
     }
 
-    // Apply updates to tickets table and calculate total revenue
+    // 5. Update the Tickets table (aggregate data: soldCount, soldSumPrice)
     for (const [ticketId, updates] of Object.entries(ticketUpdates)) {
       const ticket = await Tickets.findByPk(ticketId);
       if (ticket) {
-        // Update tickets table with new values
-        const updatedTicket = await ticket.update({
+        // Update ticket sold counts
+        await ticket.update({
           tickets_sold_count: ticket.tickets_sold_count + updates.soldCount,
           tickets_sold_count_sum_price:
-            parseFloat(ticket.tickets_sold_count_sum_price || 0) +
-            updates.soldSumPrice,
+            parseFloat(ticket.tickets_sold_count_sum_price || 0) + updates.soldSumPrice,
         });
 
-        // Re-fetch the updated ticket to get the latest tickets_sold_count_sum_price
-        const updatedTicketDetails = await Tickets.findByPk(ticketId);
+        // Re-fetch updated ticket
+        const updatedTicket = await Tickets.findByPk(ticketId);
 
-        // Update total revenue for the associated event
+        // Update event total revenue
         const event = await Event.findByPk(updates.eventId);
         if (event) {
           const totalRevenue =
             (parseFloat(event.commission) / 100) *
-            parseFloat(
-              updatedTicketDetails.tickets_sold_count_sum_price || 0
-            );
+            parseFloat(updatedTicket.tickets_sold_count_sum_price || 0);
           await event.update({ total_revenue: totalRevenue });
         }
       }
     }
 
-    res.status(200).json({
-      message: "Tickets purchase confirmed successfully.",
+    // 6. Respond
+    return res.status(200).json({
+      message: "Tickets purchase confirmed successfully. Individual emails sent.",
       data: Object.keys(ticketUpdates).map((id) => ({
         ticket_id: id,
         soldCount: ticketUpdates[id].soldCount,
@@ -325,7 +528,7 @@ exports.confirmPurchases = async (req, res) => {
     });
   } catch (error) {
     console.error("Error confirming ticket purchase:", error);
-    res.status(500).json({
+    return res.status(500).json({
       message: "Error confirming ticket purchase",
       error: error.message,
     });
@@ -385,8 +588,7 @@ exports.checkInTicket = async (req, res) => {
       error: error.message,
     });
   }
-};
-
+}
 // Get all tickets sold
 exports.getAllTicketsSold = async (req, res) => {
   try {
@@ -401,7 +603,6 @@ exports.getAllTicketsSold = async (req, res) => {
     res.status(500).json({ message: "Error retrieving tickets sold", error: error.message });
   }
 };
-
 // Get tickets sold by ID
 exports.getTicketsSoldById = async (req, res) => {
   try {
@@ -416,7 +617,6 @@ exports.getTicketsSoldById = async (req, res) => {
     res.status(500).json({ message: "Error retrieving ticket sold by ID", error: error.message });
   }
 };
-
 // Cancel Ticket Reservation by ID
 exports.cancelReservation = async (req, res) => {
   try {
