@@ -15,7 +15,8 @@ module.exports = (sequelize, Sequelize) => {
         type: Sequelize.ENUM(
           "organizer-approval",
           "event-approval",
-          "blog-approval"
+          "blog-approval",
+          "product-approval",
         ),
         allowNull: true,
       },

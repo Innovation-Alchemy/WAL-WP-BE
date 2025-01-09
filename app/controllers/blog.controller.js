@@ -3,12 +3,20 @@ const Blog = db.Blog;
 const User= db.User;
 const {createBlogSchema}= require('../utils/validations');
 const Notification = db.notification;
+const Tags = db.Tags;
+const Report= db.Report;
 /**
  * Retrieve all blogs
  */
 exports.getAllBlogs = async (req, res) => {
   try {
-    const blogs = await Blog.findAll();
+    const blogs = await Blog.findAll({
+      include: [
+        { model: Tags,  },
+        { model: Report, }, 
+      ],
+    
+    });
     res.status(200).json({ message: "Blogs retrieved successfully", data: blogs });
   } catch (error) {
     console.error("Error retrieving blogs:", error);
@@ -21,7 +29,13 @@ exports.getAllBlogs = async (req, res) => {
  */
 exports.getBlogById = async (req, res) => {
   try {
-    const blog = await Blog.findByPk(req.params.id);
+    const blog = await Blog.findByPk(req.params.id,{
+      include: [
+        { model: Tags,  },
+        { model: Report, }, 
+      ],
+    
+    });
     if (!blog) return res.status(404).json({ message: "Blog not found" });
     res.status(200).json({ message: "Blog retrieved successfully", data: blog });
   } catch (error) {

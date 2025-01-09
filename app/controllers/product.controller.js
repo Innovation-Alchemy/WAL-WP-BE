@@ -1,11 +1,19 @@
 const db = require("../models");
 const Product = db.Product;
 const Stock = db.Stock;
+const Tags = db.Tags;
+const Report= db.Report;
 const { createProductSchema } = require("../utils/validations");
 
 exports.getAllProducts = async (req, res) => {
   try {
-    const products = await Product.findAll();
+    const products = await Product.findAll({
+      include: [
+        { model: Tags,  },
+        { model: Report, }, 
+      ],
+    
+    });
     res.status(200).json({
       message: "Products retrieved successfully",
       data: products,
@@ -18,7 +26,13 @@ exports.getAllProducts = async (req, res) => {
 
 exports.getProductById = async (req, res) => {
   try {
-    const product = await Product.findByPk(req.params.id);
+    const product = await Product.findByPk(req.params.id,{
+      include: [
+        { model: Tags,  },
+        { model: Report, }, 
+      ],
+    
+    });
     if (!product) return res.status(404).json({ message: "Product not found" });
     res.status(200).json({
       message: "Product retrieved successfully",
@@ -32,7 +46,19 @@ exports.getProductById = async (req, res) => {
 
 exports.createProduct = async (req, res) => {
   try {
-    const { name, description, user_id, event_id, blog_id, commission, is_approved, price, stock_alert, size, color, quantities } = req.body;
+    const {
+      name,
+      description,
+      user_id,
+      event_id,
+      blog_id,
+      commission,
+      price,
+      stock_alert,
+      size,
+      color,
+      quantities,
+    } = req.body;
 
     // Parse and validate JSON fields
     let parsedSize, parsedColor, parsedQuantities;
@@ -41,7 +67,9 @@ exports.createProduct = async (req, res) => {
       parsedColor = JSON.parse(color);
       parsedQuantities = JSON.parse(quantities);
     } catch (error) {
-      return res.status(400).json({ message: "Size, color, and quantities must be valid JSON arrays." });
+      return res.status(400).json({
+        message: "Size, color, and quantities must be valid JSON arrays.",
+      });
     }
 
     // Handle uploaded images
@@ -52,7 +80,9 @@ exports.createProduct = async (req, res) => {
       }
 
       if (req.files.length !== parsedColor.length) {
-        return res.status(400).json({ message: "Each color must have an associated image." });
+        return res.status(400).json({
+          message: "Each color must have an associated image.",
+        });
       }
 
       imageAssociations = req.files.map((file, index) => ({
@@ -64,25 +94,13 @@ exports.createProduct = async (req, res) => {
       }));
     }
 
-    // Add image associations to the request body for validation
-    req.body.image = imageAssociations;
-
-    // Validate input using the schema
-    const validationData = {
-      ...req.body,
-      price: Number(price), // Ensure price is a number
-      size: parsedSize, // Pass parsed size array
-      color: parsedColor, // Pass parsed color array
-      quantities: parsedQuantities, // Pass parsed quantities array
-    };
-
-    const { error } = createProductSchema.validate(validationData, { abortEarly: false });
-    if (error) {
-      return res.status(400).json({
-        message: "Validation failed",
-        errors: error.details.map((err) => err.message),
-      });
+    // Check creator's role
+    const creator = await db.User.findByPk(user_id);
+    if (!creator) {
+      return res.status(404).json({ message: "User not found." });
     }
+
+    const isAdmin = creator.role === "Admin"; // Check if the user is an admin
 
     // Create the product
     const newProduct = await Product.create({
@@ -92,7 +110,7 @@ exports.createProduct = async (req, res) => {
       event_id,
       blog_id,
       commission: commission || 100.0,
-      is_approved: is_approved || false,
+      is_approved: isAdmin, // Auto-approve if Admin
       price: Number(price),
       size: parsedSize,
       color: parsedColor,
@@ -110,6 +128,22 @@ exports.createProduct = async (req, res) => {
         quantity_unit: "pcs",
         stock_alert: stock_alert || 10,
       });
+    }
+
+    // If the creator is not an admin, send notifications to all admins
+    if (!isAdmin) {
+      const admins = await db.User.findAll({ where: { role: "Admin" } });
+      const notifications = admins.map((admin) => ({
+        user_id: admin.id,
+        product_id: newProduct.id,
+        notification_type: "product-approval",
+        message: `Product "${newProduct.name}" requires approval.`,
+        is_read: false,
+      }));
+
+      if (notifications.length > 0) {
+        await db.notification.bulkCreate(notifications);
+      }
     }
 
     res.status(201).json({

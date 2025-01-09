@@ -2,12 +2,20 @@ const db = require("../models");
 const Event = db.Event;
 const Organizer = db.User;
 const Notification = db.notification;
+const Tags = db.Tags;
+const Report= db.Report;
 const { createEventSchema } = require("../utils/validations");
 
 // Get all events
 exports.getAllEvents = async (req, res) => {
   try {
-    const events = await Event.findAll();
+    const events = await Event.findAll({
+      include: [
+        { model: Tags,  },
+        { model: Report, }, 
+      ],
+    
+    });
     res.status(200).json({ message: "Events retrieved successfully", data: events });
   } catch (error) {
     console.error("Error retrieving events:", error);
@@ -17,7 +25,13 @@ exports.getAllEvents = async (req, res) => {
 // Get event by ID
 exports.getEventById = async (req, res) => {
   try {
-    const event = await Event.findByPk(req.params.id);
+    const event = await Event.findByPk(req.params.id,{
+      include: [
+        { model: Tags,  },
+        { model: Report, }, 
+      ],
+    
+    });
     if (!event) return res.status(404).json({ message: "Event not found" });
     res.status(200).json({ message: "Event retrieved successfully", data: event });
   } catch (error) {

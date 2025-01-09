@@ -3,6 +3,7 @@ const ProductPurchase = db.ProductPurchase;
 const Product = db.Product;
 const User = db.User;
 
+
 // Get all purchases
 exports.getAllPurchases = async (req, res) => {
   try {
@@ -69,74 +70,60 @@ exports.getPurchasesByUserId = async (req, res) => {
 // Create a new purchase
 exports.createPurchase = async (req, res) => {
   try {
-    const { product_id, user_id, size, color, quantity } = req.body;
+    const { product_id, user_id, color, size, quantity } = req.body;
 
-    // Validate product and user existence
+    // Validate product existence
     const product = await Product.findByPk(product_id);
     if (!product) {
       return res.status(404).json({ message: "Product not found" });
     }
 
+    // Validate user existence
     const user = await User.findByPk(user_id);
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // Check stock availability
-    if (product.quantity_in_stock <= 0) {
-      return res.status(400).json({
-        message: "This product is out of stock and cannot be purchased.",
+    // Fetch the Stock for (product_id, color, size)
+    const stock = await db.Stock.findOne({
+      where: { product_id, color, size },
+    });
+    if (!stock) {
+      return res.status(404).json({
+        message: `No stock entry found for product ${product.name} with color='${color}' and size='${size}'.`,
       });
     }
 
-    if (quantity > product.quantity_in_stock) {
+    // Check quantity
+    if (stock.quantity_in_stock < quantity) {
       return res.status(400).json({
-        message: `Only ${product.quantity_in_stock} item(s) are available.`,
+        message: `Insufficient stock. Available: ${stock.quantity_in_stock}, requested: ${quantity}.`,
       });
     }
 
-    // Parse product details
-    const productSizes = JSON.parse(product.size);
-    const productColors = JSON.parse(product.color);
-    const productPrices = JSON.parse(product.price);
-
-    // Validate size and color selection
-    const sizeIndex = productSizes.indexOf(size);
-    const colorIndex = productColors.indexOf(color);
-
-    if (sizeIndex === -1 || colorIndex === -1) {
-      return res.status(400).json({
-        message: "Invalid size or color selection.",
-      });
-    }
-
-    // Calculate price based on selected size and color
-    const priceIndex = sizeIndex * productColors.length + colorIndex;
-    const unitPrice = productPrices[priceIndex];
-
-    if (!unitPrice) {
-      return res.status(400).json({
-        message: "Price for the selected size and color is not available.",
-      });
-    }
-
+    // For the product's "base price," you might store "price" as the base. 
+    // If you have different color/size-based prices, you'd do that logic here.
+    const unitPrice = product.price;
     const totalPrice = unitPrice * quantity;
 
-    // Create the purchase with "pending" status
+    // Create the purchase (pending)
     const newPurchase = await ProductPurchase.create({
       product_id,
       user_id,
+      color,
+      size,
+      price: unitPrice,
       quantity,
+      quantity_unit: stock.quantity_unit,
       total_price: totalPrice,
-      status: "pending", // Initial status
+      status: "pending",
     });
 
-    // Update product stock
-    product.quantity_in_stock -= quantity;
-    await product.save();
+    // We do NOT subtract from stock yet if "pending" means not paid.
+    // If you want to hold stock, do so here. Otherwise, do it in "completePurchase".
 
     res.status(201).json({
-      message: "Purchase created successfully",
+      message: "Purchase created successfully (pending).",
       data: newPurchase,
     });
   } catch (error) {
@@ -145,82 +132,84 @@ exports.createPurchase = async (req, res) => {
   }
 };
 
+// complete
 exports.completePurchase = async (req, res) => {
-    try {
-      const { purchase_id } = req.params;
-  
-      // Fetch the purchase
-      const purchase = await ProductPurchase.findByPk(purchase_id, {
-        include: { model: Product },
-      });
-  
-      if (!purchase) {
-        return res.status(404).json({ message: "Purchase not found" });
-      }
-  
-      if (purchase.status === "completed") {
-        return res.status(400).json({ message: "Purchase is already completed." });
-      }
-  
-      const product = await Product.findByPk(purchase.product_id);
-      if (!product) {
-        return res.status(404).json({ message: "Product not found" });
-      }
-  
-      if (product.quantity_in_stock < purchase.quantity) {
-        return res.status(400).json({ message: "Insufficient stock available." });
-      }
-  
-      // Deduct the purchased quantity from product stock
-      product.quantity_in_stock -= purchase.quantity;
-      await product.save();
-  
-      // Update the purchase status to "completed"
-      purchase.status = "completed";
-      await purchase.save();
-  
-      // Check if stock level matches stock_alert
-      if (product.quantity_in_stock <= product.stock_alert) {
-        // Get all admins
-        const admins = await User.findAll({ where: { role: "Admin" } });
-  
-        if (admins.length > 0) {
-          // Create notifications for all admins
-          const notifications = admins.map((admin) => ({
-            user_id: admin.id,
-            product_id: product.id,
-            alerts: "low-stock",
-            message: `Product ${product.name} is running low on stock. Current stock: ${product.quantity_in_stock}`,
-            is_read: false,
-          }));
-  
-          try {
-            // Bulk insert notifications
-            await db.notification.bulkCreate(notifications);
-            console.log("Low-stock notifications sent to admins.");
-          } catch (notificationError) {
-            console.error("Error creating notifications:", notificationError);
-          }
-        } else {
-          console.warn("No admins found to notify.");
-        }
-      }
-  
-      res.status(200).json({
-        message: "Purchase completed successfully",
-        data: {
-          purchase,
-          product: {
-            id: product.id,
-            name: product.name,
-            quantity_in_stock: product.quantity_in_stock,
-          },
-        },
-      });
-    } catch (error) {
-      console.error("Error completing purchase:", error);
-      res.status(500).json({ message: "Error completing purchase", error: error.message });
+  try {
+    const { purchase_id } = req.params;
+
+    // Fetch the purchase
+    const purchase = await ProductPurchase.findByPk(purchase_id);
+    if (!purchase) {
+      return res.status(404).json({ message: "Purchase not found" });
     }
+    if (purchase.status === "completed") {
+      return res.status(400).json({ message: "Purchase is already completed." });
+    }
+
+    // Fetch the product to get info, but do stock checks in Stock table
+    const product = await Product.findByPk(purchase.product_id);
+    if (!product) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+
+    // Now fetch the Stock record
+    const stock = await db.Stock.findOne({
+      where: {
+        product_id: purchase.product_id,
+        color: purchase.color,
+        size: purchase.size,
+      },
+    });
+    if (!stock) {
+      return res.status(404).json({
+        message: `No stock entry found for product_id=${purchase.product_id}, color='${purchase.color}', size='${purchase.size}'.`,
+      });
+    }
+
+    // Check quantity
+    if (stock.quantity_in_stock < purchase.quantity) {
+      return res.status(400).json({ message: "Insufficient stock available." });
+    }
+
+    // Deduct the purchased quantity from stock
+    stock.quantity_in_stock -= purchase.quantity;
+    await stock.save();
+
+    // If the stock is below or equal to the alert, notify admins, etc.
+    if (stock.quantity_in_stock <= stock.stock_alert) {
+      // find Admin users
+      const admins = await User.findAll({ where: { role: "Admin" } });
+      if (admins.length > 0) {
+        // insert notifications or do something similar
+        console.log(
+          `ALERT: Low stock for product ${product.name}, color='${stock.color}', size='${stock.size}'. Remaining: ${stock.quantity_in_stock}`
+        );
+      }
+    }
+
+    // Mark the purchase as "completed"
+    purchase.status = "completed";
+    await purchase.save();
+
+    res.status(200).json({
+      message: "Purchase completed successfully",
+      data: {
+        purchase,
+        product: {
+          id: product.id,
+          name: product.name,
+        },
+        stock: {
+          color: stock.color,
+          size: stock.size,
+          quantity_in_stock: stock.quantity_in_stock,
+        },
+      },
+    });
+  } catch (error) {
+    console.error("Error completing purchase:", error);
+    res.status(500).json({ message: "Error completing purchase", error: error.message });
+  }
 };
   
 // Update a purchase

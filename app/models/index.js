@@ -109,10 +109,6 @@ db.Event.belongsToMany(db.Report, { through: "EventReports", foreignKey: "event_
 db.Report.belongsToMany(db.Product, { through: "ProductReports", foreignKey: "report_id", onDelete: "CASCADE" });
 db.Product.belongsToMany(db.Report, { through: "ProductReports", foreignKey: "product_id", onDelete: "CASCADE" });
 
-// User and Cart (one-to-many)
-db.User.hasMany(db.Cart, { foreignKey: "user_id", onDelete: "CASCADE" });
-db.Cart.belongsTo(db.User, { foreignKey: "user_id" });
-
 //Products and Stocks (one-to-many)
 db.Product.hasMany(db.Stock, { foreignKey: "product_id", onDelete: "CASCADE" });
 db.Stock.belongsTo(db.Product, { foreignKey: "product_id" });

@@ -22,13 +22,32 @@ exports.getAdminPanelData = async (req, res) => {
     });
 
     // STORE SECTION
-    /*const totalMerch = await Products.count();
-    const merchRevenue = await ProductPurchase.sum("total_price") || 0; // Revenue from completed purchases
-    const merchSold = await ProductPurchase.sum("quantity") || 0; // Total quantity sold
-    const top10SoldProducts = await Products.findAll({
-      order: [["quantity_in_stock", "ASC"]],
+    const totalMerch = await Products.count();
+    const merchRevenue = (await ProductPurchase.sum("total_price")) || 0; // Revenue from completed purchases
+    const merchSold = (await ProductPurchase.sum("quantity")) || 0; // Total quantity sold
+    const top10SoldProducts = await ProductPurchase.findAll({
+      attributes: [
+        "product_id",
+        [db.sequelize.fn("SUM", db.sequelize.col("quantity")), "totalSold"],
+      ],
+      group: ["product_id"],
+      order: [[db.sequelize.literal("totalSold"), "DESC"]],
       limit: 10,
-    });*/
+      include: [
+        {
+          model: Products,
+          attributes: ["id", "name", "price", "image"],
+        },
+      ],
+    });
+
+    const top10SoldProductsMapped = top10SoldProducts.map((product) => ({
+      id: product.Product.id,
+      name: product.Product.name,
+      price: product.Product.price,
+      image: product.Product.image,
+      totalSold: product.dataValues.totalSold,
+    }));
 
   // NOTIFICATIONS SECTION
   const totalNotifications = await Notification.count();
@@ -130,17 +149,12 @@ exports.getAdminPanelData = async (req, res) => {
           total_revenue: event.total_revenue,
         })),
       },
-      /*store: {
+      store: {
         totalMerch,
         merchRevenue,
         merchSold,
-        top10SoldProducts: top10SoldProducts.map((product) => ({
-          id: product.id,
-          name: product.name,
-          quantity_in_stock: product.quantity_in_stock,
-          price: product.price,
-        })),
-      },*/
+        top10SoldProducts: top10SoldProductsMapped,
+      },
       notifications: {
         totalNotifications,
         totalAlerts,
