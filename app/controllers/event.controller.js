@@ -91,7 +91,7 @@ exports.createEvent = async (req, res) => {
     if (req.file) {
       imagePath =
         process.env.NODE_ENV === 'production'
-          ? `https://wearelebanon.guide/uploads/${req.file.filename}`
+          ? `https://wal-wp-be.onrender.com/uploads/${req.file.filename}`
           : `http://localhost:8080/uploads/${req.file.filename}`;
     }
 
