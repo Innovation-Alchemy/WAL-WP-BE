@@ -533,59 +533,68 @@ const createEventSchema = Joi.object({
     "any.required": "Description is required.",
   }),
   date_time: Joi.array()
-  .items(
-    Joi.string().isoDate().required().messages({
-      "string.isoDate": "Each date and time must be in a valid ISO 8601 format.",
-      "any.required": "Each date and time is required.",
-    })
-  )
-  .min(1)
-  .required()
-  .messages({
-    "array.base": "Date and time must be provided as an array.",
-    "array.min": "At least one date and time must be provided.",
-    "any.required": "Date and time are required.",
-  })
-,
+    .items(
+      Joi.string().required().messages({
+        "any.required": "Each date and time is required.",
+      })
+    )
+    .min(1)
+    .required()
+    .messages({
+      "array.base": "Date and time must be provided as an array.",
+      "array.min": "At least one date and time must be provided.",
+      "any.required": "Date and time are required.",
+    }),
   location: Joi.object({
-    lat: Joi.number().required().messages({
-      "number.base": "Latitude must be a number.",
-      "any.required": "Latitude is required.",
-    }),
-    lng: Joi.number().required().messages({
-      "number.base": "Longitude must be a number.",
-      "any.required": "Longitude is required.",
-    }),
     address: Joi.string().optional().messages({
       "string.base": "Address must be a string.",
-      
     }),
   }).required().messages({
-    "object.base": "Location must be an object with lat, lng, and address.",
+    "object.base": "Location must be an object.",
     "any.required": "Location is required.",
   }),
-  seated: Joi.boolean().required().messages({
-    "boolean.base": "Seated must be a boolean value.",
-    "any.required": "Seated is required.",
+  ticket_maps: Joi.string().optional().messages({
+    "string.base": "Ticket maps must be a string.",
   }),
-  ticket_maps: Joi.alternatives()
-    .try(
-      Joi.string().uri().messages({ "string.uri": "Ticket maps must be a valid URL." }),
-      Joi.string().allow(null, "").messages({ "string.base": "Ticket maps can be an optional file upload." })
-    )
-    .messages({
-      "alternatives.types": "Ticket maps must be either a valid URL or an uploaded file.",
+  commission: Joi.object({
+    flat: Joi.string().required().messages({
+      "string.base": "Flat commission must be a string.",
+      "any.required": "Flat commission is required.",
     }),
-  commission: Joi.number().min(0).max(100).optional().messages({
-    "number.base": "Commission must be a number.",
-    "number.min": "Commission cannot be less than 0%.",
-    "number.max": "Commission cannot exceed 100%.",
-  }),
+    percentage: Joi.string().required().messages({
+      "string.base": "Percentage commission must be a string.",
+      "any.required": "Percentage commission is required.",
+    }),
+  }).required(),
   is_approved: Joi.boolean().optional().messages({
     "boolean.base": "Is approved must be a boolean value.",
   }),
- 
-});
+  tags: Joi.array()
+    .items(Joi.string().required())
+    .required()
+    .messages({
+      "array.base": "Tags must be an array of strings.",
+      "any.required": "Tags are required.",
+    }),
+  areas: Joi.array()
+    .items(
+      Joi.object({
+        areaName: Joi.string().required(),
+        price: Joi.string().required(),
+        seated: Joi.boolean().required(),
+        active: Joi.boolean().required(),
+      }).required()
+    )
+    .required()
+    .messages({
+      "array.base": "Areas must be an array of objects.",
+      "any.required": "Areas are required.",
+    }),
+  active: Joi.boolean().required().messages({
+    "boolean.base": "Active must be a boolean value.",
+    "any.required": "Active is required.",
+  }),
+}).unknown(true); // Allow unknown fields like "image"
 
 // input validation for creating tickets
 const createTicketsSchema = Joi.object({

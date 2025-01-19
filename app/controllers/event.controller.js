@@ -65,109 +65,56 @@ exports.getEventsByUserId = async (req, res) => {
   }
 };
 // Create a new event
-exports.createEvent = async (req, res) => {
-  
-// If date_time is a string, parse it into an actual array/object
-if (req.body.date_time && typeof req.body.date_time === "string") {
-  try {
-    req.body.date_time = JSON.parse(req.body.date_time);
-  } catch (err) {
-    return res.status(400).json({
-      message: "Invalid JSON format for date_time field.",
-    });
-  }
-}
+const fs = require('fs');
+const path = require('path');
 
-// Now run Joi validation
-const { error } = createEventSchema.validate(req.body);
-if (error) {
-  return res.status(400).json({ message: error.details[0].message });
-}
+exports.createEvent = async (req, res) => {
   try {
+    console.log('req.body:', req.body);
+    console.log('req.file:', req.file); // Log the uploaded file details
+
     const {
       organizer_id,
       title,
+      active,
       description,
       date_time,
       location,
-      seated,
-      ticket_maps,
       commission,
-      is_approved,
-      status
+      areas,
+      tags,
+      ticket_maps,
     } = req.body;
 
-    // Check if the organizer exists
-    const organizerExists = await Organizer.findByPk(organizer_id);
-    if (!organizerExists) {
-      return res.status(404).json({ message: "Organizer not found" });
-    }
-
-    if (!Array.isArray(date_time) || date_time.length === 0) {
-      return res.status(400).json({
-        message: "Invalid date_time. At least one date is required.",
-      });
-    }
-
-    // Validate location contains lat and lng
-    if (!location || !location.lat || !location.lng) {
-      return res.status(400).json({
-        message: "Invalid location data. Latitude and longitude are required.",
-      });
-    }
-
-    // Handle ticket_maps (file or URL)
-    let ticketMapPath = ticket_maps;
+    // Handle the image
+    let imagePath = null; // Default to null if no file is uploaded
     if (req.file) {
-      ticketMapPath =
-        process.env.NODE_ENV === "production"
-          ? `https://yourdomain.com/${req.file.path.replace(/\\/g, "/")}`
-          : `http://localhost:8080/${req.file.path.replace(/\\/g, "/")}`;
+      imagePath =
+        process.env.NODE_ENV === 'production'
+          ? `https://wearelebanon.guide/uploads/${req.file.filename}`
+          : `http://localhost:8080/uploads/${req.file.filename}`;
     }
 
-    // Determine is_approved value
-    const userRole = organizerExists.role;
-    const approvalStatus =
-      userRole === "Admin"
-        ? true // Admin-created events are automatically approved
-        : is_approved || false; // Use provided value if available; default to false
-
-    // Set the commission percentage
-    const eventCommission = commission || 3.0; // Default to 3% if not provided
-
-    // Create the event
+    // Save the event in the database
     const event = await Event.create({
       organizer_id,
       title,
       description,
-      date_time,
-      location,
-      seated,
-      ticket_maps: ticketMapPath,
-      commission: eventCommission,
-      is_approved: approvalStatus,
-      status: status || "pending",
+      date_time: JSON.parse(date_time),
+      location: JSON.parse(location),
+      commission: JSON.parse(commission),
+      areas: JSON.parse(areas),
+      tags: JSON.parse(tags),
+      active: active === 'true',
+      ticket_maps,
+      image: imagePath, // Save the image path if uploaded, otherwise null
     });
 
-    // If the organizer is not an admin, send a notification to admins
-    if (userRole !== "Admin") {
-      const adminUsers = await Organizer.findAll({ where: { role: "Admin" } });
-      const notifications = adminUsers.map((admin) => ({
-        user_id: admin.id,
-        notification_type: "event-approval",
-        message: `${organizerExists.name} has created an event titled "${title}" and requests approval.`,
-        event_id: event.id,
-        is_read: false,
-      }));
-
-      await Notification.bulkCreate(notifications);
-    }
-
-    res.status(201).json({ message: "Event created successfully", data: event });
+    res.status(201).json({ message: 'Event created successfully', data: event });
   } catch (error) {
-    console.error("Error creating event:", error);
+    console.error('Error creating event:', error);
     res.status(500).json({
-      message: "Error creating event",
+      message: 'Error creating event',
       error: error.message,
     });
   }
@@ -179,7 +126,7 @@ exports.updateEvent = async (req, res) => {
     if (!event) return res.status(404).json({ message: "Event not found" });
 
     const updates = {};
-    const { title, description, date_time, location, seated, ticket_maps , commission, is_approved,status} = req.body;
+    const { title, description, date_time, location, ticket_maps , commission, is_approved,status} = req.body;
 
     // Update title if provided
     if (title) updates.title = title;
@@ -213,9 +160,6 @@ if (date_time) {
       if (location.address!=undefined) currentLocation.address = location.address;
       updates.location = currentLocation;
     }
-
-    // Update seated if provided
-    if (seated !== undefined) updates.seated = seated;
 
     // Handle ticket_maps update
     if (req.file) {

@@ -1,36 +1,49 @@
-// middleware/uploadMiddleware.js
 const multer = require('multer');
+const fs = require('fs');
 const path = require('path');
 
 // Set storage destination and filename
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, './uploads'); // Save to the uploads folder
+    const uploadPath = path.join(__dirname, '../uploads'); // Adjusted path
+    console.log('Uploading to path:', uploadPath); // Debug log for directory
+
+    // Ensure the uploads directory exists
+    if (!fs.existsSync(uploadPath)) {
+      console.log('Creating uploads directory:', uploadPath);
+      fs.mkdirSync(uploadPath, { recursive: true }); // Create directory recursively
+    }
+    cb(null, uploadPath); // Save to the correct uploads folder
   },
   filename: function (req, file, cb) {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
-  }
+    console.log('Received file:', file.originalname); // Debug log for the file
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+    const fileName = `${file.fieldname}-${uniqueSuffix}${path.extname(file.originalname)}`;
+    console.log('Generated file name:', fileName); // Debug log for the generated name
+    cb(null, fileName); // Save file with the generated name
+  },
 });
 
-// File filtering based on mime type
+// Filter files by type
 const fileFilter = (req, file, cb) => {
-  const fileTypes = /jpeg|jpg|png|gif|mp4|mov|avi|webp|pdf|txt/;
-  const extname = fileTypes.test(path.extname(file.originalname).toLowerCase());
-  const mimetype = fileTypes.test(file.mimetype);
+  console.log('Filtering file:', file.originalname); // Debug log for file filter
+  const allowedTypes = /jpeg|jpg|png|gif/;
+  const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
+  const mimetype = allowedTypes.test(file.mimetype);
 
   if (mimetype && extname) {
-    return cb(null, true);
+    cb(null, true); // Accept file
   } else {
-    cb(new Error('Only images and videos are allowed!'));
+    console.error('Invalid file type:', file.mimetype); // Log invalid file type
+    cb(new Error('Only images are allowed!')); // Reject file
   }
 };
 
-// Set the upload limits and apply the storage settings
+// Configure multer
 const upload = multer({
   storage: storage,
-  limits: { fileSize: 100 * 1024 * 1024 }, // 100MB limit for uploads
-  fileFilter: fileFilter
+  limits: { fileSize: 5 * 1024 * 1024 }, // Limit file size to 5MB
+  fileFilter: fileFilter,
 });
 
 module.exports = upload;

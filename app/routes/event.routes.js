@@ -11,8 +11,8 @@ module.exports = (app) => {
     router.get('/events', authenticate, eventController.getAllEvents);
     router.get('/events/:id', authenticate, eventController.getEventById);
     router.get('/events/for-user/:user_id', authenticate, eventController.getEventsByUserId);
-    router.post('/events', authenticate,upload.single("ticket_maps"), checkPermission('create-event'), eventController.createEvent);
-    router.put('/events/:id', authenticate,upload.single("ticket_maps"), checkPermission('update-event'), eventController.updateEvent);
+    router.post('/events', authenticate,upload.single("image"), checkPermission('create-event'), eventController.createEvent);
+    router.put('/events/:id', authenticate,upload.single("image"), checkPermission('update-event'), eventController.updateEvent);
     router.delete('/events/:id', authenticate, checkPermission('delete-event'), eventController.deleteEvent);
   
     app.use('/api', router);
